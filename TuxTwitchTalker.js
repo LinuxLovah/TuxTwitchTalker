@@ -1,7 +1,15 @@
 // https://dev.twitch.tv/docs/irc
 
 const tmi = require('tmi.js');
-const env = require('./linux_lovah_config.json');
+
+// First parameter is the config file to load
+const configFile = process.argv[2];
+console.log(`config file '${configFile}'`);
+if(! configFile ||  configFile.length === 0) {
+	console.log(`No config file specified, exiting`);
+	process.exit(1);
+}
+const env = require(configFile);
 
 var seenUsers = [];
 

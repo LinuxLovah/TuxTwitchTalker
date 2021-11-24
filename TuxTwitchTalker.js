@@ -1,6 +1,7 @@
 // https://dev.twitch.tv/docs/irc
 
 const tmi = require('tmi.js');
+const fs = require('fs');
 
 // First parameter is the config file to load
 const configFile = process.argv[2];
@@ -22,11 +23,8 @@ const opts = {
 	channels: env.CHANNELS
 };
 
-
-console.log(`-------- LOGGING IN`);
 // Create a client with our options
 const client = new tmi.client(opts);
-console.log(`-------- LOGGED IN`);
 
 // Register our event handlers (defined below)
 // https://d-fischer.github.io/twitch-chat-client/reference/classes/ChatClient.html
@@ -73,7 +71,6 @@ client.on('subgift', (channel, user, subInfo) => {
 
 
 /*
-
 client.on('chat', (channel, user, message, self) => {
 	console.log(`Got a chat [${channel}|${user}|${message}]`);
 	});
@@ -82,19 +79,25 @@ client.on('chat', (channel, user, message, self) => {
 // Connect to Twitch:
 client.connect();
 
+/////////////////////////  Event Handlers
 
+
+// Called every time the bot connects to Twitch chat
+function onConnectedHandler(addr, port) {
+	console.log(`Connected to ${addr}:${port}`);
+}
 
 // Called every time a message comes in
 function onMessageHandler(target, user, msg, self) {
 	if (env.IGNORE_USERS.includes(user.username)) {
-		console.log(`Ignoring message '${msg}' from '${user.username}'`);
+		// console.log(`Ignoring message '${msg}' from '${user.username}'`);
 		return;
 	}
 
-	console.log(`Got '${msg}' from '${user.username}'`);
 
 	// Remove whitespace from chat message
-	const commandName = msg.trim();
+	let commandName = msg.replace(/[^\x20-\x7E]/g, '').trim();
+	console.log(`Got '${commandName}' from '${user.username}' was '${msg}'`);
 
 	// If the command is known, let's execute it
 	// Admin commands begin with !!
@@ -113,7 +116,8 @@ function onMessageHandler(target, user, msg, self) {
 		if (commandName === '!dice') {
 			const num = rollDice();
 			client.say(target, `You rolled a ${num}`);
-			console.log(`Executed ${commandName} command`);
+		} else if(commandName === '!dadjoke') {
+			client.say(target, readRandomLine("dadjokes"));
 		} else {
 			console.log(`Unknown command '${commandName}' from '${user.username}'`);
 		}
@@ -125,6 +129,8 @@ function onMessageHandler(target, user, msg, self) {
 
 	}
 }
+
+///////////////////////// Helper methods
 
 // Greet new users
 function greetNewUsers(target, user) {
@@ -152,8 +158,27 @@ function rollDice() {
 	return Math.floor(Math.random() * sides) + 1;
 }
 
-// Called every time the bot connects to Twitch chat
-function onConnectedHandler(addr, port) {
-	console.log(`Connected to ${addr}:${port}`);
+// Return a random line from a file
+function readRandomLine(dataFile) {
+	try {
+		// Look up the dataFile name
+		fileName = env.DATA_FILES[dataFile];
+
+		// read contents of the file
+		let data = fs.readFileSync(fileName, 'UTF-8');
+		// split the contents by new line
+		let lines = data.split(/\r?\n/);
+		// Read a random line
+		let lineNumber = Math.floor(Math.random() * lines.length);
+		let text = lines[lineNumber];
+		console.log(`readRandomLine: Line number is ${lineNumber} of ${lines.length}, text is '${text}'`);
+
+
+		return text;
+
+	} catch (err) {
+		console.error(err);
+	}
 }
+
 

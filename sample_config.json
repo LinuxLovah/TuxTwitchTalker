@@ -5,5 +5,8 @@
 	"ADMIN_USERS": ["YOUR_USER", "MOD1_USER", "MOD2_USER"],
 	"CHANNELS": ["YOUR_CHANNEL_TO_JOIN"],
 	"NEW_USER_GREETING": "Welcome to the chat, USERNAME! Good to see you! CoolCat CoolCat CoolCat ",
-	"NEW_MOD_GREETING": "Welcome to the chat, USERNAME! MOD IN DA HOUSE! everyone look busy! BibleThump BibleThump BibleThump "
+	"NEW_MOD_GREETING": "Welcome to the chat, USERNAME! MOD IN DA HOUSE! everyone look busy! BibleThump BibleThump BibleThump ",
+	"DATA_FILES": {
+		"KEY FOR readRandomLine()": "Path to file, probably in data/"
+	}
 }

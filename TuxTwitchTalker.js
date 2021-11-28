@@ -90,7 +90,7 @@ function onConnectedHandler(addr, port) {
 }
 
 // Called every time a message comes in
-function onMessageHandler(target, user, msg, self) {
+function onMessageHandler(target, user, msg) {
 	if (env.IGNORE_USERS.includes(user.username)) {
 		// console.log(`Ignoring message '${msg}' from '${user.username}'`);
 		return;
@@ -99,7 +99,7 @@ function onMessageHandler(target, user, msg, self) {
 
 	// Remove whitespace from chat message
 	let commandName = msg.replace(/[^\x20-\x7E]/g, '').trim();
-	console.log(`Got '${commandName}' from '${user.username}' was '${msg}'`);
+	console.log(`Got '${commandName}' from '${user.username}'`);
 
 	// If the command is known, let's execute it
 	// Admin commands begin with !!
@@ -115,27 +115,31 @@ function onMessageHandler(target, user, msg, self) {
 			console.log(`Ignoring admin command '${commandName}' from '${user.username}'`);
 		}
 	} else if (commandName.slice(0, 1) === "!") {
+		// Non-admin commands
 		if (commandName === '!dice') {
-			const num = rollDice();
-			client.say(target, `You rolled a ${num}`);
-		} else if (commandName === '!dadjoke') {
-			client.say(target, readRandomLine("dadjokes"));
-		} else {
-			console.log(`Unknown command '${commandName}' from '${user.username}'`);
+			runRollDice(target, user, commandName);
 		}
+
+		// Is this a response command, that spits out canned text from the config?
+		runResponseCommands(target, user, commandName);
+
+		// Is this a command to return a random line from a a file defined in RANDOM_FILE_LINE_COMMANDS?
+		runRandomFileLineCommands(target, user, commandName);
 	} else {
 		// Not a command
 
 		// Is this a new user?
-		greetNewUsers(target, user);
+		runFirstSeen(target, user, commandName);
+
+
 
 	}
 }
 
 ///////////////////////// Helper methods
 
-// Greet new users
-function greetNewUsers(target, user) {
+// Greet viewers the first time we see them in chat
+function runFirstSeen(target, user, commandName) {
 	// Don't greet the broadcaster, he doesn't like talking to themself
 	//if (user.badges && user.badges.broadcaster) {
 	//	return;
@@ -174,25 +178,43 @@ function greetNewUsers(target, user) {
 		}
 
 		if (soundFile && soundFile.length > 0) {
-			audioPlayer.play(soundFile, function(err){
+			audioPlayer.play(soundFile, function (err) {
 				if (err) throw err
-			  })		}
+			})
+		}
 
 	}
 }
 
 // Function called when the "dice" command is issued
-function rollDice() {
-	const sides = 6;
-	return Math.floor(Math.random() * sides) + 1;
+function runRollDice(target, user, commandName) {
+	if (isCommandEnabled("!dice")) {
+		const sides = 6;
+		var num = Math.floor(Math.random() * sides) + 1;
+		client.say(target, `You rolled a ${num}, ${user.username}`);
+	}
+}
+
+// Some commands are to read a random line from a file.
+// These commands will be defined in the RANDOM_FILE_LINE_COMMANDS array in the config file
+function runRandomFileLineCommands(target, user, commandName) {
+	if (env.RANDOM_FILE_LINE_COMMANDS[commandName]) {
+		var fileName = env.RANDOM_FILE_LINE_COMMANDS[commandName];
+		client.say(target, readRandomLine(fileName));
+	}
+}
+
+//Commands that send out canned text (with username substitution) from the RESPONSE_COMMANDS array
+function runResponseCommands(target, user, commandName) {
+	if (env.RESPONSE_COMMANDS && env.RESPONSE_COMMANDS[commandName]) {
+		var reply = env.RESPONSE_COMMANDS[commandName].replace('USERNAME', user.username);
+		client.say(target, reply);
+	}
 }
 
 // Return a random line from a file
-function readRandomLine(dataFile) {
+function readRandomLine(fileName) {
 	try {
-		// Look up the dataFile name
-		fileName = env.DATA_FILES[dataFile];
-
 		// read contents of the file
 		let data = fs.readFileSync(fileName, 'UTF-8');
 		// split the contents by new line
@@ -208,6 +230,10 @@ function readRandomLine(dataFile) {
 	} catch (err) {
 		console.error(err);
 	}
+}
+
+function isCommandEnabled(command) {
+	return (env.COMMANDS_FEATURE_FLAGS[command] && env.COMMANDS_FEATURE_FLAGS[command] === "true")
 }
 
 

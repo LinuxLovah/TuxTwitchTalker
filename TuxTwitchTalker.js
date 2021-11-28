@@ -2,7 +2,7 @@
 
 const tmi = require('tmi.js');
 const fs = require('fs');
-var player = require('play-sound')()
+var audioPlayer = require('play-sound')()
 
 
 // First parameter is the config file to load
@@ -127,7 +127,7 @@ function onMessageHandler(target, user, msg, self) {
 		// Not a command
 
 		// Is this a new user?
-		greetNewUsers(target, user, player);
+		greetNewUsers(target, user);
 
 	}
 }
@@ -135,7 +135,7 @@ function onMessageHandler(target, user, msg, self) {
 ///////////////////////// Helper methods
 
 // Greet new users
-function greetNewUsers(target, user, player) {
+function greetNewUsers(target, user) {
 	// Don't greet the broadcaster, he doesn't like talking to themself
 	//if (user.badges && user.badges.broadcaster) {
 	//	return;
@@ -174,7 +174,7 @@ function greetNewUsers(target, user, player) {
 		}
 
 		if (soundFile && soundFile.length > 0) {
-			player.play(soundFile, function(err){
+			audioPlayer.play(soundFile, function(err){
 				if (err) throw err
 			  })		}
 

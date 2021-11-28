@@ -2,6 +2,8 @@
 
 const tmi = require('tmi.js');
 const fs = require('fs');
+var player = require('play-sound')()
+
 
 // First parameter is the config file to load
 const configFile = process.argv[2];
@@ -125,7 +127,7 @@ function onMessageHandler(target, user, msg, self) {
 		// Not a command
 
 		// Is this a new user?
-		greetNewUsers(target, user);
+		greetNewUsers(target, user, player);
 
 	}
 }
@@ -133,7 +135,7 @@ function onMessageHandler(target, user, msg, self) {
 ///////////////////////// Helper methods
 
 // Greet new users
-function greetNewUsers(target, user) {
+function greetNewUsers(target, user, player) {
 	// Don't greet the broadcaster, he doesn't like talking to themself
 	//if (user.badges && user.badges.broadcaster) {
 	//	return;
@@ -142,15 +144,17 @@ function greetNewUsers(target, user) {
 	if (!seenUsers.includes(user.username)) {
 		seenUsers.push(user.username);
 		console.log(`New user '${user.username}'`);
+
+		// Chat reply
 		var reply = "";
-		if (env.PERSONAL_GREETINGS) {
+		if (env.CHAT_GREETINGS) {
 			// Find and format greeting text
-			if (env.PERSONAL_GREETINGS[user.username]) {
-				reply = env.PERSONAL_GREETINGS[user.username]
-			} else if (user.mod && env.PERSONAL_GREETINGS['default_mod']) {
-				reply = env.PERSONAL_GREETINGS['default_mod'];
-			} else if (env.PERSONAL_GREETINGS['default']) {
-				reply = env.PERSONAL_GREETINGS['default'];
+			if (env.CHAT_GREETINGS[user.username]) {
+				reply = env.CHAT_GREETINGS[user.username]
+			} else if (user.mod && env.CHAT_GREETINGS['default_mod']) {
+				reply = env.CHAT_GREETINGS['default_mod'];
+			} else if (env.CHAT_GREETINGS['default']) {
+				reply = env.CHAT_GREETINGS['default'];
 			}
 
 			if (reply && reply.length > 0) {
@@ -158,6 +162,22 @@ function greetNewUsers(target, user) {
 				client.say(target, reply);
 			}
 		}
+
+		// Audio reply
+		var soundFile = "";
+		if (env.AUDIO_GREETINGS[user.username]) {
+			soundFile = env.AUDIO_GREETINGS[user.username]
+		} else if (user.mod && env.AUDIO_GREETINGS['default_mod']) {
+			soundFile = env.AUDIO_GREETINGS['default_mod'];
+		} else if (env.AUDIO_GREETINGS['default']) {
+			soundFile = env.AUDIO_GREETINGS['default'];
+		}
+
+		if (soundFile && soundFile.length > 0) {
+			player.play(soundFile, function(err){
+				if (err) throw err
+			  })		}
+
 	}
 }
 

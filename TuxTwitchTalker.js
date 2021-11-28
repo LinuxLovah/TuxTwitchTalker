@@ -6,7 +6,7 @@ const fs = require('fs');
 // First parameter is the config file to load
 const configFile = process.argv[2];
 console.log(`config file '${configFile}'`);
-if(! configFile ||  configFile.length === 0) {
+if (!configFile || configFile.length === 0) {
 	console.log(`No config file specified, exiting`);
 	process.exit(1);
 }
@@ -48,11 +48,11 @@ client.on('raid', (channel, msg) => {
 // https://github.com/tmijs/tmi.js/issues/363
 const tierList = { 1000: 'Tier 1', 2000: 'Tier 2', 3000: 'Tier 3' };
 client.on('resub', (channel, username, months, message, userstate, methods) => {
-    const { prime, plan, planName } = methods;
-    let msg = `${username} just resubbed`;
-    if(prime) msg += ' using Prime';
-    else if(plan !== '1000') msg += ' at ${tierList[plan]}';
-    client.say(channel, `${msg}!`);
+	const { prime, plan, planName } = methods;
+	let msg = `${username} just resubbed`;
+	if (prime) msg += ' using Prime';
+	else if (plan !== '1000') msg += ' at ${tierList[plan]}';
+	client.say(channel, `${msg}!`);
 });
 
 
@@ -116,7 +116,7 @@ function onMessageHandler(target, user, msg, self) {
 		if (commandName === '!dice') {
 			const num = rollDice();
 			client.say(target, `You rolled a ${num}`);
-		} else if(commandName === '!dadjoke') {
+		} else if (commandName === '!dadjoke') {
 			client.say(target, readRandomLine("dadjokes"));
 		} else {
 			console.log(`Unknown command '${commandName}' from '${user.username}'`);
@@ -135,20 +135,29 @@ function onMessageHandler(target, user, msg, self) {
 // Greet new users
 function greetNewUsers(target, user) {
 	// Don't greet the broadcaster, he doesn't like talking to themself
-	if (user.badges && user.badges.broadcaster) {
-		return;
-	}
+	//if (user.badges && user.badges.broadcaster) {
+	//	return;
+	//}
 
 	if (!seenUsers.includes(user.username)) {
 		seenUsers.push(user.username);
 		console.log(`New user '${user.username}'`);
-		var reply;
-		if (user.mod) {
-			reply = env.NEW_MOD_GREETING.replace('USERNAME', user.username);
-		} else {
-			reply = env.NEW_USER_GREETING.replace('USERNAME', user.username);
+		var reply = "";
+		if (env.PERSONAL_GREETINGS) {
+			// Find and format greeting text
+			if (env.PERSONAL_GREETINGS[user.username]) {
+				reply = env.PERSONAL_GREETINGS[user.username]
+			} else if (user.mod && env.PERSONAL_GREETINGS['default_mod']) {
+				reply = env.PERSONAL_GREETINGS['default_mod'];
+			} else if (env.PERSONAL_GREETINGS['default']) {
+				reply = env.PERSONAL_GREETINGS['default'];
+			}
+
+			if (reply && reply.length > 0) {
+				reply = reply.replace('USERNAME', user.username);
+				client.say(target, reply);
+			}
 		}
-		client.say(target, reply);
 	}
 }
 

@@ -13,6 +13,7 @@
 
 //--------------------- Load dependency objects
 const tmi = require('tmi.js');
+const path = require('path');
 const fs = require('fs');
 const audioPlayer = require('play-sound')()
 
@@ -24,7 +25,7 @@ var seenUsers = [];
 // Default is "./config.json"
 var configFile = process.argv[2];
 if(! configFile || configFile.length === 0) {
-	configFile = "./config.json";
+	configFile = "." + path.sep + "config.json";
 }
 if (! configFile || configFile.length === 0) {
 	console.log(`No config file specified. Exiting.`);
@@ -113,7 +114,7 @@ function onConnectedHandler(addr, port) {
 // Called every time a message comes in
 function onMessageHandler(target, user, msg) {
 	if (env.IGNORE_USERS.includes(user.username)) {
-		// console.log(`Ignoring message '${msg}' from '${user.username}'`);
+		console.log(`Ignoring message '${msg}' from '${user.username}'`);
 		return;
 	}
 

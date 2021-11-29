@@ -35,6 +35,8 @@ Features, planned
 * Greeting/sound on follow
 * Greeting/sound on sub/resub
 * Greeting/sound on gift sub
+* Identify VIP users (if possible) as I do moderators
+* Timer commands that post fixed messages to chat periodically
 
 
 Features, long term
@@ -70,9 +72,10 @@ TuxTwitchTalker is configured using [a JSON file](https://en.wikipedia.org/wiki/
 
 There is a sample configuration file called **sample_config.json**.  It's important to note that JSON file doesn't support comments, so the documentation is included as JSON format as lines starting with **"COMMENT"**.
 1. Copy **sample_config.json** to **config.json**
-2. TuxTwitchTalker can log in with your personal username, or you can create a new twitch account for the bot to log into.  Add the username to the config file
-3. Generate an OAuth hash at https://twitchapps.com/tmi/ while logged into Twitch as the username the bot will log in as, and add the hash to the config file
-4. Follow the directions in the config file to fill in the rest of the file, like users to respond to, etc., making sure to replace all text surrounded in % (percent)
+2. Edit config.json in your favorite text editor.  Do not use Word, or Wordpad, or any other word processing program that will change characters to non-ASCII characters.
+3. TuxTwitchTalker can log in with your personal username, or you can create a new twitch account for the bot to log into.  Add the username to the config file
+4. Generate an OAuth hash at https://twitchapps.com/tmi/ while logged into Twitch as the username the bot will log in as, and add the hash to the config file
+5. Follow the directions in the config file to fill in the rest of the file, like users to respond to, etc., making sure to replace all text surrounded in % (percent)
 
 
 Running TuxTwitchTalker

@@ -1,10 +1,10 @@
 {
-  "name": "LlamaBot",
+  "name": "TuxTwitchTalker",
   "version": "0.0.1",
   "description": "A simple app chatbot example. Using the command !echo will simply repeat the message.",
-  "main": "bot.js",
+  "main": "TuxTwitchTalker.js",
   "scripts": {
-    "start": "node TuxTwitchTalker ./linux_lovah_config.json"
+    "start": "node TuxTwitchTalker"
   },
   "dependencies": {
     "dependencies": "0.0.1",
@@ -18,10 +18,15 @@
   "repository": {
     "url": "https://glitch.com/edit/#!/twitch-chatbot"
   },
+  "Author": "LinuxLovah",
   "license": "MIT",
   "keywords": [
-    "twitch",
-    "chatbots",
-    "irc"
-  ]
+	  "twitch",
+	  "chatbots",
+	  "irc"
+	],
+  "bugs": {
+	  "url": "https://github.com/LinuxLovah/TuxTwitchTalker/issues"
+  },
+  "homepage": "https://github.com/LinuxLovah/TuxTwitchTalker"
 }

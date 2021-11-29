@@ -1,22 +1,43 @@
-// https://dev.twitch.tv/docs/irc
+/**
+ * TuxTwitchTalker: A bot to interact with Twitch Chat.
+ * See https://github.com/LinuxLovah/TuxTwitchTalker
+ *
+ * Parts of this program were modeled on:
+ * 		https://dev.twitch.tv/docs/irc
+ * 		https://d-fischer.github.io/twitch-chat-client/reference/classes/ChatClient.html
+ * 		https://github.com/tmijs/tmi.js/issues/363
+ * 		https://twurple.js.org/docs/examples/chat/basic-bot.html
+ */
 
+
+
+//--------------------- Load dependency objects
 const tmi = require('tmi.js');
 const fs = require('fs');
-var audioPlayer = require('play-sound')()
+const audioPlayer = require('play-sound')()
 
+//--------------------- Global variables
+var seenUsers = [];
 
+//--------------------- Config
 // First parameter is the config file to load
-const configFile = process.argv[2];
-console.log(`config file '${configFile}'`);
-if (!configFile || configFile.length === 0) {
-	console.log(`No config file specified, exiting`);
+// Default is "./config.json"
+var configFile = process.argv[2];
+if(! configFile || configFile.length === 0) {
+	configFile = "./config.json";
+}
+if (! configFile || configFile.length === 0) {
+	console.log(`No config file specified. Exiting.`);
+	process.exit(1);
+} else if(! fs.existsSync(configFile)) {
+	console.log(`Config file '${configFile}' does not exist.  Exiting.`);
 	process.exit(1);
 }
 const env = require(configFile);
+console.log(`config file '${configFile}'`);
 
-var seenUsers = [];
-
-// Define configuration options
+//--------------------- Connect and register handlers
+// Define tmi configuration options
 const opts = {
 	identity: {
 		username: env.BOT_NAME,
@@ -25,29 +46,28 @@ const opts = {
 	channels: env.CHANNELS
 };
 
-// Create a client with our options
 const client = new tmi.client(opts);
 
-// Register our event handlers (defined below)
-// https://d-fischer.github.io/twitch-chat-client/reference/classes/ChatClient.html
-client.on('message', onMessageHandler);
 client.on('connected', onConnectedHandler);
+client.on('message', onMessageHandler);
 
 
-
+// UNTESTED
 client.on('usernotice', (channel, user, message, self) => {
 	console.log(`Got a usernotice [${channel}|${user}|${message}]`);
 });
 
+// UNTESTED
 client.on('host', (channel, target, viewers) => {
 	console.log(`Got a host [${channel}|${target}|${viewers}]`);
 });
 
+// UNTESTED
 client.on('raid', (channel, msg) => {
 	console.log(`Got a raid [${channel}|${msg}]`);
 });
 
-// https://github.com/tmijs/tmi.js/issues/363
+// UNTESTED
 const tierList = { 1000: 'Tier 1', 2000: 'Tier 2', 3000: 'Tier 3' };
 client.on('resub', (channel, username, months, message, userstate, methods) => {
 	const { prime, plan, planName } = methods;
@@ -57,22 +77,23 @@ client.on('resub', (channel, username, months, message, userstate, methods) => {
 	client.say(channel, `${msg}!`);
 });
 
-
-// https://twurple.js.org/docs/examples/chat/basic-bot.html
+// UNTESTED
 client.on('sub', (channel, user) => {
 	console.log(`Thanks to @${user} for subscribing to the channel!`);
 });
 
+// UNTESTED
 client.on('resub', (channel, user, subInfo) => {
 	console.log(`)Thanks to @${user} for subscribing to the channel for a total of ${subInfo.months} months!`);
 });
 
+// UNTESTED
 client.on('subgift', (channel, user, subInfo) => {
 	console.log(`Thanks to ${subInfo.gifter} for gifting a subscription to ${user}!`);
 });
 
-
 /*
+What is the difference between onChat and onMessage?
 client.on('chat', (channel, user, message, self) => {
 	console.log(`Got a chat [${channel}|${user}|${message}]`);
 	});
@@ -81,8 +102,8 @@ client.on('chat', (channel, user, message, self) => {
 // Connect to Twitch:
 client.connect();
 
-/////////////////////////  Event Handlers
 
+//--------------------- Event Handlers
 
 // Called every time the bot connects to Twitch chat
 function onConnectedHandler(addr, port) {
@@ -135,8 +156,6 @@ function onMessageHandler(target, user, msg) {
 
 	}
 }
-
-///////////////////////// Helper methods
 
 // Greet viewers the first time we see them in chat
 function runFirstSeen(target, user, commandName) {
@@ -211,6 +230,9 @@ function runResponseCommands(target, user, commandName) {
 		client.say(target, reply);
 	}
 }
+
+
+//--------------------- Helper Methods
 
 // Return a random line from a file
 function readRandomLine(fileName) {

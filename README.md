@@ -87,6 +87,6 @@ If you need to specify an alternate configuration file, type
 
 Support/Contact
 ---
-* [LinuxLovah@gmail.com](mailto: LinuxLovah@gmail.com)
+* [LinuxLovah@gmail.com](mailto:LinuxLovah@gmail.com)
 * https://twitter.com/LinuxLovahTTV
 * I offer support [on my Discord server](https://discord.gg/dJeFM2GpZN) in the **#streaming-tech-talk** channel

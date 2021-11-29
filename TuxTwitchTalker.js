@@ -26,7 +26,7 @@ var seenUsers = [];
 // Default is "./config.json"
 var configFile = process.argv[2];
 if(! configFile || configFile.length === 0) {
-	configFile = "." + path.sep + "config.json";
+	configFile = "./config.json";
 }
 if (! configFile || configFile.length === 0) {
 	console.log(`No config file specified. Exiting.`);

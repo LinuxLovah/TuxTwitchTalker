@@ -15,7 +15,8 @@
 const tmi = require('tmi.js');
 const path = require('path');
 const fs = require('fs');
-const audioPlayer = require('play-sound')()
+const { exec } = require("child_process");
+//const audioPlayer = require('play-sound')()
 
 //--------------------- Global variables
 var seenUsers = [];
@@ -118,7 +119,6 @@ function onMessageHandler(target, user, msg) {
 		return;
 	}
 
-
 	// Remove whitespace from chat message
 	let commandName = msg.replace(/[^\x20-\x7E]/g, '').trim();
 	console.log(`Got '${commandName}' from '${user.username}'`);
@@ -198,9 +198,7 @@ function runFirstSeen(target, user, commandName) {
 		}
 
 		if (soundFile && soundFile.length > 0) {
-			audioPlayer.play(soundFile, function (err) {
-				if (err) throw err
-			})
+			playMedia(soundFile);
 		}
 
 	}
@@ -259,4 +257,22 @@ function isCommandEnabled(command) {
 	return (env.COMMANDS_FEATURE_FLAGS[command] && env.COMMANDS_FEATURE_FLAGS[command] === "true")
 }
 
+function playMedia(mediaFile) {
+	if(env.MEDIA_PLAYER_COMMAND) {
+		let command = env.MEDIA_PLAYER_COMMAND.replace("MEDIAFILE",mediaFile);
 
+		exec(command, (error, stdout, stderr) => {
+			if (error) {
+				console.log(`error: ${error.message}`);
+				return;
+			}
+			if (stderr) {
+				console.log(`stderr: ${stderr}`);
+				return;
+			}
+			console.log(`stdout: ${stdout}`);
+		});
+
+
+	}
+}

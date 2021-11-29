@@ -69,5 +69,11 @@
 	],
 	"COMMANDS_FEATURE_FLAGS": {
 		"!dice": 		"true"
-	}
+	},
+	"COMMENT": [
+		"Command line program (with path) to play media files",
+		"The VLC command below works well for me on both Linux and Windows as long as vlc is in your path",
+		"MEDIAFILE will be replaced by the name of the file to play"
+	],
+	"MEDIA_PLAYER_COMMAND": "vlc -I dummy --play-and-exit MEDIAFILE"
 }

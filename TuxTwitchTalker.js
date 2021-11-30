@@ -127,9 +127,24 @@ function onMessageHandler(target, user, msg) {
 	// Admin commands begin with !!
 	if (commandName.slice(0, 2) === "!!") {
 		if (env.ADMIN_USERS.includes(user.username)) {
-			if (commandName === '!!clearseen') {
+			if (commandName === '!!clearSeen') {
 				seenUsers = [];
-				console.log(`Cleared seen users list`);
+				console.log(`Seen list is now ${seenUsers}`);
+			} else if (commandName.startsWith("!!delSeen ")) {
+				user = commandName.split(" ")[1];
+				for( var i = 0; i < seenUsers.length; i++){
+					if ( seenUsers[i] === user) {
+						seenUsers.splice(i, 1);
+					}
+				}
+				console.log(`Seen list is now ${seenUsers}`);
+			} else if (commandName.startsWith("!!addSeen ")) {
+				user = commandName.split(" ")[1];
+				seenUsers.push(user);
+				console.log(`Seen list is now ${seenUsers}`);
+			} else if (commandName.startsWith("!!testGreeting ")) {
+				user = commandName.split(" ")[1];
+				testGreeting(target, user, commandName);
 			} else {
 				console.log(`Unknown admin command ${commandName}`);
 			}
@@ -228,6 +243,20 @@ function runResponseCommands(target, user, commandName) {
 		var reply = env.RESPONSE_COMMANDS[commandName].replace('USERNAME', user.username);
 		client.say(target, reply);
 	}
+}
+
+// Test the chat and media greeting of a user
+function testGreeting(target, user, commandName) {
+	if(env.CHAT_GREETINGS[user]) {
+		message = env.CHAT_GREETINGS[user].replace('USERNAME', user);
+		console.log(`User greeting '${user}':'${message}'`);
+	}
+	if(env.AUDIO_GREETINGS[user]) {
+		mediaFile = env.AUDIO_GREETINGS[user]
+		console.log(`User media '${user}':'${mediaFile}'`);
+		playMedia(mediaFile);
+	}
+
 }
 
 

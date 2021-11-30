@@ -22,7 +22,10 @@ Features, already implemented
 * "Response commands" are commands that the bot replies to with a canned message (can be used for listing alerts, social links, etc.).
   * messages can have the sender's username inserted in the message.
 * Administrative commands that can only be executed by specific users
-  * **!!clearseen**: Clears the list of seen users, so everyone will be greeted again when they next chat.
+  * **!!clearSeen**: Clears the list of seen users, so everyone will be greeted again when they next chat.
+  *  **!!delSeen USERNAME**: Remove USERNAME from the seen list (specify a real username)
+  *  **!!addSeen USERNAME**: Adds USERNAME to the seen list (specify a real username)
+  *  **!!testGreeting USERNAME**: Tests the chat and media greetings for USERNAME to verify they are configured right (specify a real username)
 * User commands can be run by everyone.  All user commands can be turned on and off in the configuration.
   * **!dice**: Rolls a dice and replies in chat with the number (1-6) rolled.
 
@@ -37,6 +40,7 @@ Features, planned
 * Greeting/sound on gift sub
 * Identify VIP users (if possible) as I do moderators
 * Timer commands that post fixed messages to chat periodically
+* Automatic shout-outs for a set list of users
 
 
 Features, long term
@@ -44,8 +48,9 @@ Features, long term
 * A way to alert with video in addition to sounds and chat messages
 * A way to replace Streamlabs Labels to update files with latest follower, latest sub, etc.
 * Multi-tenant redesign so that one instance of TuxTwitchTalker can respond to the chat for multiple streamers, each with their separate configuration.
+* Browser source to push visual content to broadcasting software
 
-My goal is to get all of these features (except possibly multi-tenancy) by the end of 2021.
+My goal is to get most of these features implemented by the end of 2021.
 
 
 Licensing

@@ -16,6 +16,7 @@ const tmi = require('tmi.js');
 const path = require('path');
 const fs = require('fs');
 const { exec } = require("child_process");
+const { exit } = require('process');
 //const audioPlayer = require('play-sound')()
 
 //--------------------- Global variables
@@ -37,6 +38,7 @@ if (! configFile || configFile.length === 0) {
 }
 const env = require(configFile);
 console.log(`config file '${configFile}'`);
+const channel = env.CHANNELS[0];
 
 //--------------------- Connect and register handlers
 // Define tmi configuration options
@@ -104,6 +106,16 @@ client.on('chat', (channel, user, message, self) => {
 // Connect to Twitch:
 client.connect();
 
+//--------------------- Periodic messages
+for(const message of env.PERIODIC_MESSAGES) {
+	console.log(`Loading periodic message '${message["TITLE"]}'`);
+
+	setInterval(()=> {
+		client.say(channel, message["TEXT"]);
+	  },message["INTERVAL"] * 60000); // milliseconds = minutes * 60 * 1000
+
+
+}
 
 //--------------------- Event Handlers
 

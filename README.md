@@ -21,6 +21,7 @@ Features, already implemented
   * Greetings can have the new viewer's username inserted in the message.
 * "Response commands" are commands that the bot replies to with a canned message (can be used for listing alerts, social links, etc.).
   * messages can have the sender's username inserted in the message.
+* Periodic messages are text that gets sent to chat at a fixed rate.  This is often used for things like social links, channel rules, etc.
 * Administrative commands that can only be executed by specific users
   * **!!clearSeen**: Clears the list of seen users, so everyone will be greeted again when they next chat.
   *  **!!delSeen USERNAME**: Remove USERNAME from the seen list (specify a real username)
@@ -39,7 +40,6 @@ Features, planned
 * Greeting/sound on sub/resub
 * Greeting/sound on gift sub
 * Identify VIP users (if possible) as I do moderators
-* Timer commands that post fixed messages to chat periodically
 * Automatic shout-outs for a set list of users
 
 

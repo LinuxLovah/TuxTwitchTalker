@@ -8,6 +8,12 @@
 	"BOT_NAME": "%BOT_NAME%",
 	"COMMENT": "Generate this value from https://twitchapps.com/tmi/ logged in as the above user",
 	"TMI_OAUTH": "oauth:%OAUTH_HASH%",
+	"COMMENT": [
+		"Command line program (with path) to play media files",
+		"The VLC command below works well for me on both Linux and Windows as long as vlc is in your path",
+		"MEDIAFILE will be replaced by the name of the file to play"
+	],
+	"MEDIA_PLAYER_COMMAND": "vlc -I dummy --play-and-exit MEDIAFILE",
 	"COMMENT": "This is a list of usernames that the bot should not respond to.  Add all your other bots here.",
 	"IGNORE_USERS": [
 		"Streamlabs",
@@ -71,9 +77,28 @@
 		"!dice": 		"true"
 	},
 	"COMMENT": [
-		"Command line program (with path) to play media files",
-		"The VLC command below works well for me on both Linux and Windows as long as vlc is in your path",
-		"MEDIAFILE will be replaced by the name of the file to play"
+		"Periodic messages will be posted in chat... periodically.  Each entry in the array has three fields",
+		"TITLE is what you call the message.  It doesn't get printed but it is logged when it loads.",
+		"INTERVAL is the number of minutes between posting the message",
+		"TEXT is the text to display in chat.",
+		"It's a good idea to not have the intervals the same or multiples so the messages don't print right after each other",
+		"In the future the message title may be used to cancel or change frequency of messages live"
 	],
-	"MEDIA_PLAYER_COMMAND": "vlc -I dummy --play-and-exit MEDIAFILE"
+	"PERIODIC_MESSAGES": [
+		{
+			"TITLE": 	"first_message",
+			"INTERVAL": 20,
+			"TEXT":		"Print this in chat ever 20 minutes"
+		},
+		{
+			"TITLE": 	"second_message",
+			"INTERVAL": 25,
+			"TEXT":		"Print this in chat ever 25 minutes"
+		},
+		{
+			"TITLE": 	"third_message",
+			"INTERVAL": 30,
+			"TEXT":		"Print this in chat ever 30 minutes"
+		}
+	]
 }

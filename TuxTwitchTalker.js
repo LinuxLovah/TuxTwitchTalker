@@ -17,10 +17,12 @@ const path = require('path');
 const fs = require('fs');
 const { exec } = require("child_process");
 const { exit } = require('process');
-//const audioPlayer = require('play-sound')()
+const http = require('http');
+const url = require('url');
 
 //--------------------- Global variables
 var seenUsers = [];
+var browserSourceAlertContent = "";
 
 //--------------------- Config
 // First parameter is the config file to load
@@ -117,6 +119,11 @@ for(const message of env.PERIODIC_MESSAGES) {
 
 }
 
+//--------------------- Browser Source web server
+
+http.createServer(onWebRequest).listen(8888);
+console.log('Web server has started listing on 8888');
+
 //--------------------- Event Handlers
 
 // Called every time the bot connects to Twitch chat
@@ -179,9 +186,7 @@ function onMessageHandler(target, user, msg) {
 
 		// Is this a new user?
 		runFirstSeen(target, user, commandName);
-
-
-
+		browserSourceAlertContent = commandName;
 	}
 }
 
@@ -269,6 +274,30 @@ function testGreeting(target, user, commandName) {
 		playMedia(mediaFile);
 	}
 
+}
+
+function onWebRequest(request, response) {
+	const querystring=request.url;
+	console.log(`Web request: ${querystring}`);
+
+	if(querystring.startsWith("/lastSeen")) {
+		response.writeHead(200);
+		response.write(`${seenUsers}`);
+		response.end();
+	} else if(querystring.startsWith("/alert")) {
+		response.writeHead(200);
+		response.write(`${browserSourceAlertContent}`);
+		response.end();
+	} else if(querystring.startsWith("/peng")) {
+		response.writeHead(200);
+		response.write('<html><head></head><body><iframe src="https://giphy.com/embed/VkMV9TldsPd28" width="480" height="270" frameBorder="0" class="giphy-embed" allowFullScreen></iframe><p><a href="https://giphy.com/gifs/penguin-business-VkMV9TldsPd28"></a></p></body>');
+		response.end();
+	} else if(querystring.startsWith("/pr0n")) {
+		response.writeHead(200);
+		response.write('<html><body><video id="example_video_1" class="video-js vjs-default-skin" width="640" height="264" src="file://videos/__Envy_Anne-_3.75_OF_-_Good_girl_does_what_she_s_told-1440870490696916995.mp4" type="video/mp4" /></video></body>');
+		//file:///tmp/__Envy_Anne-_3.75_OF_-_Good_girl_does_what_she_s_told-1440870490696916995.mp4"></iframe>');
+		response.end();
+	}
 }
 
 

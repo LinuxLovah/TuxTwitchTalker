@@ -57,63 +57,17 @@ const client = new tmi.client(opts);
 client.on('connected', onConnectedHandler);
 client.on('message', onMessageHandler);
 
-
-// UNTESTED
-client.on('usernotice', (channel, user, message, self) => {
-	console.log(`Got a usernotice [${channel}|${user}|${message}]`);
-});
-
-// UNTESTED
-client.on('host', (channel, target, viewers) => {
-	console.log(`Got a host [${channel}|${target}|${viewers}]`);
-});
-
-// UNTESTED
-client.on('raid', (channel, msg) => {
-	console.log(`Got a raid [${channel}|${msg}]`);
-});
-
-// UNTESTED
-const tierList = { 1000: 'Tier 1', 2000: 'Tier 2', 3000: 'Tier 3' };
-client.on('resub', (channel, username, months, message, userstate, methods) => {
-	const { prime, plan, planName } = methods;
-	let msg = `${username} just resubbed`;
-	if (prime) msg += ' using Prime';
-	else if (plan !== '1000') msg += ' at ${tierList[plan]}';
-	client.say(channel, `${msg}!`);
-});
-
-// UNTESTED
-client.on('sub', (channel, user) => {
-	console.log(`Thanks to @${user} for subscribing to the channel!`);
-});
-
-// UNTESTED
-client.on('resub', (channel, user, subInfo) => {
-	console.log(`)Thanks to @${user} for subscribing to the channel for a total of ${subInfo.months} months!`);
-});
-
-// UNTESTED
-client.on('subgift', (channel, user, subInfo) => {
-	console.log(`Thanks to ${subInfo.gifter} for gifting a subscription to ${user}!`);
-});
-
-/*
-What is the difference between onChat and onMessage?
-client.on('chat', (channel, user, message, self) => {
-	console.log(`Got a chat [${channel}|${user}|${message}]`);
-	});
-*/
-
 // Connect to Twitch:
 client.connect();
+
 
 //--------------------- Periodic messages
 for(const message of env.PERIODIC_MESSAGES) {
 	console.log(`Loading periodic message '${message["TITLE"]}'`);
 
 	setInterval(()=> {
-		client.say(channel, message["TEXT"]);
+		console.log(`Posting periodic message ${message["TITLE"]} every ${message["INTERVAL"]}`)
+		client.say(channel, message["TEXT"])
 	  },message["INTERVAL"] * 60000); // milliseconds = minutes * 60 * 1000
 
 
@@ -124,23 +78,22 @@ for(const message of env.PERIODIC_MESSAGES) {
 http.createServer(onWebRequest).listen(8888);
 console.log('Web server has started listing on 8888');
 
-//--------------------- Event Handlers
 
+//--------------------- Event Handlers
 // Called every time the bot connects to Twitch chat
 function onConnectedHandler(addr, port) {
 	console.log(`Connected to ${addr}:${port}`);
 }
 
+
 // Called every time a message comes in
 function onMessageHandler(target, user, msg) {
 	if (env.IGNORE_USERS.includes(user.username)) {
-		console.log(`Ignoring message '${msg}' from '${user.username}'`);
 		return;
 	}
 
 	// Remove whitespace from chat message
 	let commandName = msg.replace(/[^\x20-\x7E]/g, '').trim();
-	console.log(`Got '${commandName}' from '${user.username}'`);
 
 	// If the command is known, let's execute it
 	// Admin commands begin with !!
@@ -193,9 +146,9 @@ function onMessageHandler(target, user, msg) {
 // Greet viewers the first time we see them in chat
 function runFirstSeen(target, user, commandName) {
 	// Don't greet the broadcaster, he doesn't like talking to themself
-	//if (user.badges && user.badges.broadcaster) {
-	//	return;
-	//}
+	if (user.badges && user.badges.broadcaster) {
+		return;
+	}
 
 	if (!seenUsers.includes(user.username)) {
 		seenUsers.push(user.username);
@@ -276,6 +229,8 @@ function testGreeting(target, user, commandName) {
 
 }
 
+// Most of the browser source/web server stuff is experimental
+// and will be used more in later releases
 function onWebRequest(request, response) {
 	const querystring=request.url;
 	console.log(`Web request: ${querystring}`);
@@ -291,11 +246,6 @@ function onWebRequest(request, response) {
 	} else if(querystring.startsWith("/peng")) {
 		response.writeHead(200);
 		response.write('<html><head></head><body><iframe src="https://giphy.com/embed/VkMV9TldsPd28" width="480" height="270" frameBorder="0" class="giphy-embed" allowFullScreen></iframe><p><a href="https://giphy.com/gifs/penguin-business-VkMV9TldsPd28"></a></p></body>');
-		response.end();
-	} else if(querystring.startsWith("/pr0n")) {
-		response.writeHead(200);
-		response.write('<html><body><video id="example_video_1" class="video-js vjs-default-skin" width="640" height="264" src="file://videos/__Envy_Anne-_3.75_OF_-_Good_girl_does_what_she_s_told-1440870490696916995.mp4" type="video/mp4" /></video></body>');
-		//file:///tmp/__Envy_Anne-_3.75_OF_-_Good_girl_does_what_she_s_told-1440870490696916995.mp4"></iframe>');
 		response.end();
 	}
 }
@@ -314,8 +264,6 @@ function readRandomLine(fileName) {
 		let lineNumber = Math.floor(Math.random() * lines.length);
 		let text = lines[lineNumber];
 		console.log(`readRandomLine: Line number is ${lineNumber} of ${lines.length}, text is '${text}'`);
-
-
 		return text;
 
 	} catch (err) {

@@ -98,45 +98,11 @@ function onMessageHandler(target, user, msg) {
 	// If the command is known, let's execute it
 	// Admin commands begin with !!
 	if (commandName.slice(0, 2) === "!!") {
-		if (env.ADMIN_USERS.includes(user.username)) {
-			if (commandName === '!!clearSeen') {
-				seenUsers = [];
-				console.log(`Seen list is now ${seenUsers}`);
-			} else if (commandName.startsWith("!!delSeen ")) {
-				user = commandName.split(" ")[1];
-				for( var i = 0; i < seenUsers.length; i++){
-					if ( seenUsers[i] === user) {
-						seenUsers.splice(i, 1);
-					}
-				}
-				console.log(`Seen list is now ${seenUsers}`);
-			} else if (commandName.startsWith("!!addSeen ")) {
-				user = commandName.split(" ")[1];
-				seenUsers.push(user);
-				console.log(`Seen list is now ${seenUsers}`);
-			} else if (commandName.startsWith("!!testGreeting ")) {
-				user = commandName.split(" ")[1];
-				testGreeting(target, user, commandName);
-			} else {
-				console.log(`Unknown admin command ${commandName}`);
-			}
-		} else {
-			console.log(`Ignoring admin command '${commandName}' from '${user.username}'`);
-		}
+		runAdminCommand(target, user, commandName);
 	} else if (commandName.slice(0, 1) === "!") {
-		// Non-admin commands
-		if (commandName === '!dice') {
-			runRollDice(target, user, commandName);
-		}
-
-		// Is this a response command, that spits out canned text from the config?
-		runResponseCommands(target, user, commandName);
-
-		// Is this a command to return a random line from a a file defined in RANDOM_FILE_LINE_COMMANDS?
-		runRandomFileLineCommands(target, user, commandName);
+		runUserCommand(target, user, commandName);
 	} else {
 		// Not a command
-
 		// Is this a new user?
 		runFirstSeen(target, user, commandName);
 		browserSourceAlertContent = commandName;
@@ -152,40 +118,8 @@ function runFirstSeen(target, user, commandName) {
 
 	if (!seenUsers.includes(user.username)) {
 		seenUsers.push(user.username);
-		console.log(`New user '${user.username}'`);
-
-		// Chat reply
-		var reply = "";
-		if (env.CHAT_GREETINGS) {
-			// Find and format greeting text
-			if (env.CHAT_GREETINGS[user.username]) {
-				reply = env.CHAT_GREETINGS[user.username]
-			} else if (user.mod && env.CHAT_GREETINGS['default_mod']) {
-				reply = env.CHAT_GREETINGS['default_mod'];
-			} else if (env.CHAT_GREETINGS['default']) {
-				reply = env.CHAT_GREETINGS['default'];
-			}
-
-			if (reply && reply.length > 0) {
-				reply = reply.replace('USERNAME', user.username);
-				client.say(target, reply);
-			}
-		}
-
-		// Audio reply
-		var soundFile = "";
-		if (env.AUDIO_GREETINGS[user.username]) {
-			soundFile = env.AUDIO_GREETINGS[user.username]
-		} else if (user.mod && env.AUDIO_GREETINGS['default_mod']) {
-			soundFile = env.AUDIO_GREETINGS['default_mod'];
-		} else if (env.AUDIO_GREETINGS['default']) {
-			soundFile = env.AUDIO_GREETINGS['default'];
-		}
-
-		if (soundFile && soundFile.length > 0) {
-			playMedia(soundFile);
-		}
-
+		console.log(`New user seen '${user.username}'`);
+		greetUser(target, user, commandName);
 	}
 }
 
@@ -215,19 +149,50 @@ function runResponseCommands(target, user, commandName) {
 	}
 }
 
-// Test the chat and media greeting of a user
-function testGreeting(target, user, commandName) {
-	if(env.CHAT_GREETINGS[user]) {
-		message = env.CHAT_GREETINGS[user].replace('USERNAME', user);
-		console.log(`User greeting '${user}':'${message}'`);
+function runAdminCommand(target, user, commandName) {
+	if (env.ADMIN_USERS.includes(user.username)) {
+		if (commandName === '!!clearSeen') {
+			seenUsers = [];
+			console.log(`Seen list is now ${seenUsers}`);
+		} else if (commandName.startsWith("!!delSeen ")) {
+			user = commandName.split(" ")[1];
+			for( var i = 0; i < seenUsers.length; i++){
+				if ( seenUsers[i] === user) {
+					seenUsers.splice(i, 1);
+				}
+			}
+			console.log(`Seen list is now ${seenUsers}`);
+		} else if (commandName.startsWith("!!addSeen ")) {
+			user = commandName.split(" ")[1];
+			seenUsers.push(user);
+			console.log(`Seen list is now ${seenUsers}`);
+		} else if (commandName.startsWith("!!testGreeting ")) {
+			let username = commandName.split(" ")[1];
+			user = {
+				"username": username
+			}
+			greetUser(target, user, commandName);
+		} else {
+			console.log(`Unknown admin command ${commandName}`);
+		}
+	} else {
+		console.log(`Ignoring admin command '${commandName}' from '${user.username}'`);
 	}
-	if(env.AUDIO_GREETINGS[user]) {
-		mediaFile = env.AUDIO_GREETINGS[user]
-		console.log(`User media '${user}':'${mediaFile}'`);
-		playMedia(mediaFile);
+}
+
+
+function runUserCommand(target, user, commandName) {
+	if (commandName === '!dice') {
+		runRollDice(target, user, commandName);
 	}
 
+	// Is this a response command, that spits out canned text from the config?
+	runResponseCommands(target, user, commandName);
+
+	// Is this a command to return a random line from a a file defined in RANDOM_FILE_LINE_COMMANDS?
+	runRandomFileLineCommands(target, user, commandName);
 }
+
 
 // Most of the browser source/web server stuff is experimental
 // and will be used more in later releases
@@ -252,6 +217,44 @@ function onWebRequest(request, response) {
 
 
 //--------------------- Helper Methods
+
+function greetUser(target, user, commandName) {
+	if (env.GREETINGS) {
+		let greeting = "";
+		// Find and format greeting text
+		if (env.GREETINGS[user.username] && env.GREETINGS[user.username]["CHAT"]) {
+			greeting = env.GREETINGS[user.username]["CHAT"];
+		} else if (user.mod && env.GREETINGS["default_mod"]["CHAT"]) {
+			greeting = env.GREETINGS["default_mod"]["CHAT"];
+		} else if (user.vip && GREETINGS["default_vip"]["CHAT"]) {
+			greeting = env.GREETINGS["default_vip"]["CHAT"];
+		} else if (env.GREETINGS["default"]["CHAT"]) {
+			greeting = env.GREETINGS["default"]["CHAT"];
+		}
+
+		if (greeting && greeting.length > 0) {
+			greeting = greeting.replace("USERNAME", user.username);
+			client.say(target, greeting);
+		}
+
+		// Find and play media
+		greeting = "";
+		if (env.GREETINGS[user.username] && env.GREETINGS[user.username]["MEDIA"]) {
+			greeting = env.GREETINGS[user.username]["MEDIA"];
+		} else if (user.mod && env.GREETINGS["default_mod"]["MEDIA"]) {
+			greeting = env.GREETINGS["default_mod"]["MEDIA"];
+		} else if (user.vip && GREETINGS["default_vip"]["MEDIA"]) {
+			greeting = env.GREETINGS["default_vip"]["MEDIA"];
+		} else if (env.GREETINGS["default"]["MEDIA"]) {
+			greeting = env.GREETINGS["default"]["MEDIA"];
+		}
+
+		if (greeting && greeting.length > 0) {
+			greeting = greeting.replace("USERNAME", user.username);
+			playMedia(greeting);
+		}
+	}
+}
 
 // Return a random line from a file
 function readRandomLine(fileName) {

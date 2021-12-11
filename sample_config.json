@@ -33,26 +33,43 @@
 		"This is a list of regulars in your channel, and how you would like them",
 		"to be greeted when they chat for the first time in the session.",
 		"If the user doesn't have an entry and they are a mod, the message on the *default_mod* line will be used.",
-		"If the user doesn't have an entry and they are not a mod, the message on the *default* line will be used.",
-		"For all messages, the word USERNAME will be replaced with the user's real username."
+		"If the user doesn't have an entry and they are a VIP, the message on the *default_vip* line will be used.",
+		"If the user doesn't have an entry and they are not a mod/vip, the message on the *default* line will be used.",
+		"For all messages, the word USERNAME will be replaced with the user's real username.",
+		"This is true of media files too, so if you choose to name your media files with the username in them you can just put USERNAME in the file name and it will load the right one",
+		"I admit the JSON here may be a little confusing but there's a map for each username, and each username can have a CHAT entry and/or a MEDIA entry",
+		"If a user has a CHAT entry but no MEDIA entry, the default MEDIA entry will be used, and vice verse."
 	],
-	"CHAT_GREETINGS": {
-		"%REG1_USERNAME%":	"Welcome, friendo USERNAME! ",
-		"%REG2_USERNAME%":	"Welcome, waifu USERNAME! ",
-		"default_mod":		"Welcome to the chat, USERNAME! MOD IN DA HOUSE! everyone look busy! BibleThump BibleThump BibleThump ",
-		"default": 			"Welcome to the chat, USERNAME! Good to see you! CoolCat CoolCat CoolCat "
+	"GREETINGS": {
+		"REGULAR_1_USERNAME": {
+			"CHAT":			"Welcome, USERNAME! Man of mystery!",
+			"MEDIA":		"../sounds/order66.mp3"
+		},
+		"REGULAR_1_USERNAME": {
+			"MEDIA":		"../sounds/get-lucky-daft-punk-flute-cover-50.mp3"
+		},
+		"REGULAR_3_USERNAME": {
+			"CHAT":			"Hey everyone! USERNAME is here! Let's all tell them how much we appreciate them",
+			"MEDIA":		"../sounds/chicken_1.mp3"
+		},
+		"REGULAR_4_USERNAME": {
+			"CHAT":			"Our pal USERNAME is here. The turtle lover supreme!",
+			"MEDIA":		"../sounds/i_like_turtles.mp3"
+		},
+		"default_mod": {
+			"CHAT":			"Welcome to the chat, USERNAME! MOD IN DA HOUSE! Everyone look busy! BibleThump BibleThump BibleThump ",
+			"MEDIA":		"../sounds/hello_doubtfire.mp3"
+		},
+		"default_vip": {
+			"CHAT":			"Welcome to the chat, USERNAME! VIP IN DA HOUSE! Give them some space! BibleThump BibleThump BibleThump ",
+			"MEDIA":		"../sounds/hello_doubtfire.mp3"
+		},
+		"default": {
+			"CHAT":			"Welcome to the chat, USERNAME!",
+			"MEDIA":		"../sounds/hello_doubtfire.mp3"
+		}
 	},
-	"COMMENT": [
-		"Like above, but these are audio files to play when they chat for the first time in the session.",
-		"Make sure to include the relative path, even if the audio file is in the current directory"
-	],
-	"AUDIO_GREETINGS": {
-		"%REG1_USERNAME%":	"./sounds/gg.mp3",
-		"%REG2_USERNAME%":	"./sounds/hello_nurse.mp3",
-		"default_mod":		"./sounds/bruh.mp3",
-		"default": 			"./sounds/hello.mp3"
 
-	},
 	"COMMENT": [
 		"This is a list of commands and associated text files.",
 		"When the command is executed, the reply will be a random line from the specified file.",

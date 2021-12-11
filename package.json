@@ -1,7 +1,7 @@
 {
   "name": "TuxTwitchTalker",
-  "version": "0.0.1",
-  "description": "A simple app chatbot example. Using the command !echo will simply repeat the message.",
+  "version": "1.0.0",
+  "description": "A Twitch bot which enables per-user greetings and interactions, chat commands, and more to come",
   "main": "TuxTwitchTalker.js",
   "scripts": {
     "start": "node TuxTwitchTalker"
@@ -17,7 +17,7 @@
   "repository": {
     "url": "https://glitch.com/edit/#!/twitch-chatbot"
   },
-  "Author": "LinuxLovah",
+  "Author": "LinuxLovah LinuxLovah@gmail.com",
   "license": "MIT",
   "keywords": [
 	  "twitch",

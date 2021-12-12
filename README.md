@@ -98,3 +98,14 @@ Support/Contact
 * [LinuxLovah@gmail.com](mailto:LinuxLovah@gmail.com)
 * https://twitter.com/LinuxLovahTTV
 * I offer support [on my Discord server](https://discord.gg/dJeFM2GpZN) in the **#streaming-tech-talk** channel
+
+Donations
+---
+I will NEVER charge for this bot. It will always be free open source.  If you would like to donate, though you can paypal LinuxLovah@gmail.com
+<form action="https://www.paypal.com/donate" method="post" target="_top">
+<input type="hidden" name="business" value="MYYKAGE7725C4" />
+<input type="hidden" name="no_recurring" value="0" />
+<input type="hidden" name="currency_code" value="USD" />
+<input type="image" src="https://www.paypalobjects.com/en_US/i/btn/btn_donate_SM.gif" border="0" name="submit" title="PayPal - The safer, easier way to pay online!" alt="Donate with PayPal button" />
+<img alt="" border="0" src="https://www.paypal.com/en_US/i/scr/pixel.gif" width="1" height="1" />
+</form>

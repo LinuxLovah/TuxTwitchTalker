@@ -23,7 +23,6 @@ const url = require('url');
 //--------------------- Global variables
 var seenUsers = [];
 var browserSourceAlertContent = "";
-var triggerMessages = {};
 
 //--------------------- Config
 // First parameter is the config file to load
@@ -70,17 +69,8 @@ for(const message of env.PERIODIC_MESSAGES) {
 		console.log(`Posting periodic message ${message["TITLE"]} every ${message["INTERVAL"]}`)
 		client.say(channel, message["TEXT"])
 	  },message["INTERVAL"] * 60000); // milliseconds = minutes * 60 * 1000
-}
 
 
-//--------------------- Triggered messages
-for(const message of env.TRIGGERED_MESSAGES) {
-	console.log(`Loading triggered message '${message["TITLE"]}'`);
-
-	setInterval(()=> {
-		console.log(`Posting periodic message ${message["TITLE"]} every ${message["INTERVAL"]}`)
-		client.say(channel, message["TEXT"])
-	  },message["INTERVAL"] * 60000); // milliseconds = minutes * 60 * 1000
 }
 
 //--------------------- Browser Source web server

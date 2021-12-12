@@ -9,6 +9,7 @@
   "dependencies": {
     "dependencies": "1.1",
     "express": "^4.17.1",
+    "json-schema": "^0.4.0",
     "tmi.js": "^1.8.5"
   },
   "engines": {
@@ -20,12 +21,12 @@
   "Author": "LinuxLovah LinuxLovah@gmail.com",
   "license": "MIT",
   "keywords": [
-	  "twitch",
-	  "chatbots",
-	  "irc"
-	],
+    "twitch",
+    "chatbots",
+    "irc"
+  ],
   "bugs": {
-	  "url": "https://github.com/LinuxLovah/TuxTwitchTalker/issues"
+    "url": "https://github.com/LinuxLovah/TuxTwitchTalker/issues"
   },
   "homepage": "https://github.com/LinuxLovah/TuxTwitchTalker"
 }

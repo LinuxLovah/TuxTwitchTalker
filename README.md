@@ -81,7 +81,7 @@ There is a sample configuration file called **sample_config.json**.  It's import
 2. Edit config.json in your favorite text editor.  Do not use Word, or Wordpad, or any other word processing program that will change characters to non-ASCII characters.
 3. TuxTwitchTalker can log in with your personal username, or you can create a new twitch account for the bot to log into.  Add the username to the config file
 4. Generate an OAuth hash at https://twitchapps.com/tmi/ while logged into Twitch as the username the bot will log in as, and add the hash to the config file
-5. Follow the directions in the config file to fill in the rest of the file, like users to respond to, etc., making sure to replace all text surrounded in % (percent)
+5. Follow the directions in the config file to fill in the rest of the file, like users to respond to, etc.
 
 
 Running TuxTwitchTalker

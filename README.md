@@ -101,7 +101,7 @@ Support/Contact
 
 Donations
 ---
-I will NEVER charge for this bot. It will always be free open source.  If you would like to donate, though you can paypal LinuxLovah@gmail.com
+I will NEVER charge for this bot. It will always be free open source.  If you would like to donate, though you can paypal here:
 <form action="https://www.paypal.com/donate" method="post" target="_top">
 <input type="hidden" name="business" value="MYYKAGE7725C4" />
 <input type="hidden" name="no_recurring" value="0" />

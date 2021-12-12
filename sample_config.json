@@ -117,5 +117,26 @@
 			"INTERVAL": 30,
 			"TEXT":		"Print this in chat ever 30 minutes"
 		}
-	]
+	],
+	"COMMENT": [
+		"Triggered messages are messages that are sent when a word or phrase appears in chat.",
+		"As with greetings, they can be CHAT or MEDIA",
+		"The word or phrase should be expressed as a regular expression",
+		"(see https://www.oreilly.com/content/an-introduction-to-regular-expressions/)",
+		"If you don't want to learn regular expressions, just use the word or phrase"
+	],
+	"TRIGGERED_MESSAGES": {
+		"cat": {
+			"CHAT":		"Cat was mentioned",
+			"MEDIA":	"../sounds/cat-meow-short_nice.mp3"
+		},
+		"[^a-zA-Z0-9]cat[^a-zA-Z0-9]": {
+			"CHAT":		"Cat was mentioned, but guarantees its the word 'cat', not just 'cat' anywhere on the line, including part of another word",
+			"MEDIA":	"../sounds/cat-meow-short_nice.mp3"
+		},
+		"^cat": {
+			"CHAT":		"Cat was mentioned at the beginning of a line",
+			"MEDIA":	"../sounds/cat-meow-short_nice.mp3"
+		}
+	}
 }

@@ -23,6 +23,7 @@ const url = require('url');
 //--------------------- Global variables
 var seenUsers = [];
 var browserSourceAlertContent = "";
+var triggerMessages = {};
 
 //--------------------- Config
 // First parameter is the config file to load
@@ -69,8 +70,17 @@ for(const message of env.PERIODIC_MESSAGES) {
 		console.log(`Posting periodic message ${message["TITLE"]} every ${message["INTERVAL"]}`)
 		client.say(channel, message["TEXT"])
 	  },message["INTERVAL"] * 60000); // milliseconds = minutes * 60 * 1000
+}
 
 
+//--------------------- Triggered messages
+for(const message of env.TRIGGERED_MESSAGES) {
+	console.log(`Loading triggered message '${message["TITLE"]}'`);
+
+	setInterval(()=> {
+		console.log(`Posting periodic message ${message["TITLE"]} every ${message["INTERVAL"]}`)
+		client.say(channel, message["TEXT"])
+	  },message["INTERVAL"] * 60000); // milliseconds = minutes * 60 * 1000
 }
 
 //--------------------- Browser Source web server
@@ -103,9 +113,12 @@ function onMessageHandler(target, user, msg) {
 		runUserCommand(target, user, commandName);
 	} else {
 		// Not a command
+
 		// Is this a new user?
 		runFirstSeen(target, user, commandName);
-		browserSourceAlertContent = commandName;
+
+		// Is it a trigger command
+		runTriggeredCommand(target, user, commandName);
 	}
 }
 
@@ -191,6 +204,23 @@ function runUserCommand(target, user, commandName) {
 
 	// Is this a command to return a random line from a a file defined in RANDOM_FILE_LINE_COMMANDS?
 	runRandomFileLineCommands(target, user, commandName);
+}
+
+function runTriggeredCommand(target, user, message) {
+	for(const trigger in env.TRIGGERED_MESSAGES) {
+		let regex = new RegExp(trigger);
+		if(message.match(regex)) {
+			console.log(`Found message matching ${regex}`)
+			if(env.TRIGGERED_MESSAGES[trigger]["CHAT"]) {
+				let reply = env.TRIGGERED_MESSAGES[trigger]["CHAT"].replace("USERNAME", user.username);
+				client.say(target, reply);
+			}
+			if(env.TRIGGERED_MESSAGES[trigger]["MEDIA"]) {
+				let mediaFile = env.TRIGGERED_MESSAGES[trigger]["MEDIA"].replace("USERNAME", user.username);
+				playMedia(mediaFile);
+			}
+		}
+	}
 }
 
 

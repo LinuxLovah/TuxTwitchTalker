@@ -14,14 +14,17 @@ A part of my motivation to create TuxTwitchTalker was to help myself and others 
 
 Features, already implemented
 ---
-* When a viewer types in chat for the first time since TuxTwitchTalker was started, they can be greeted with text sent to chat/sound file.
+* **Greetings**: When a viewer types in chat for the first time since TuxTwitchTalker was started, they can be greeted with text sent to chat/sound file.
   * Individual regulars can have a special greeting/sound play for them
   * Mods can have a separate greeting/sound play for them
   * There can also be a default greeting/sound for those without specific greetings.
   * Greetings can have the new viewer's username inserted in the message.
-* "Response commands" are commands that the bot replies to with a canned message (can be used for listing alerts, social links, etc.).
+* **Response commands**: Commands that the bot replies to with a canned message (can be used for listing alerts, social links, etc.).
   * messages can have the sender's username inserted in the message.
-* Periodic messages are text that gets sent to chat at a fixed rate.  This is often used for things like social links, channel rules, etc.
+* **Periodic messages**: Messages sent to chat at a fixed rate.  This is often used for things like social links, channel rules, etc.
+*  **Triggered messages**: Messages sent to chat when a specific word or phrase is mentioned.
+   *  The trigger can be a [regular expression](https://www.oreilly.com/content/an-introduction-to-regular-expressions/)
+   * messages can have the sender's username inserted in the message.
 * Administrative commands that can only be executed by specific users
   * **!!clearSeen**: Clears the list of seen users, so everyone will be greeted again when they next chat.
   *  **!!delSeen USERNAME**: Remove USERNAME from the seen list (specify a real username)
@@ -33,13 +36,11 @@ Features, already implemented
 
 Features, planned
 ---
-* Greeting/sound when chat matches a regular expression
 * Greeting/sound on raid
 * Greeting/sound on host
 * Greeting/sound on follow
 * Greeting/sound on sub/resub
 * Greeting/sound on gift sub
-* Identify VIP users (if possible) as I do moderators
 * Automatic shout-outs for a set list of users
 
 
@@ -58,7 +59,7 @@ Licensing
 TuxTwitchTalker is released under the [Apache 2.0 licence ](https://www.apache.org/licenses/LICENSE-2.0).  A simplified explanation of this license [from Wikipedia](https://en.wikipedia.org/wiki/Apache_License) is:
 > The Apache License is a permissive free software license written by the Apache Software Foundation (ASF).[5] It allows users to use the software for any purpose, to distribute it, to modify it, and to distribute modified versions of the software under the terms of the license, without concern for royalties.
 
-In essence, anyone can use TuxTwitchTalker, but I don't want a company (like Streamlabs) to take it and sell it as a commercial product.
+In essence, anyone can use TuxTwitchTalker, but I don't want a company (like Streamlabs) to take it and sell it as a commercial product.  It will ALWAYS be free and open source.
 
 
 Installation

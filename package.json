@@ -1,13 +1,13 @@
 {
   "name": "TuxTwitchTalker",
-  "version": "1.0.0",
+  "version": "1.1.0",
   "description": "A Twitch bot which enables per-user greetings and interactions, chat commands, and more to come",
   "main": "TuxTwitchTalker.js",
   "scripts": {
     "start": "node TuxTwitchTalker"
   },
   "dependencies": {
-    "dependencies": "0.0.1",
+    "dependencies": "1.1",
     "express": "^4.17.1",
     "tmi.js": "^1.8.5"
   },

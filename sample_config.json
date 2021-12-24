@@ -137,6 +137,14 @@
 		"^cat": {
 			"CHAT":		"Cat was mentioned at the beginning of a line",
 			"MEDIA":	"../sounds/cat-meow-short_nice.mp3"
+		},
+		"COMMENT": [
+			"Timers are created by the !!timer command.  When the timer runs out, these alerts will be triggered.  All timers use the same alerts",
+			"The word TIMERNAME will be replaced with the name of the timer given when created, so you can use different media files for each."
+		],
+		"TIMER_ALERT": {
+			"CHAT":		"Timer TIMERNAME is done!",
+			"MEDIA":	"../sounds/ding-sound-effect_2.mp3"
 		}
 	}
 }

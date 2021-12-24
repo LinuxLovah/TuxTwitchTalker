@@ -94,26 +94,91 @@ function onMessageHandler(target, user, msg) {
 
 	// Remove whitespace from chat message
 	let commandName = msg.replace(/[^\x20-\x7E]/g, '').trim();
+	let args = commandName.split(/(\s+)/)
+
+	// If we haven't seen this user before, greet them
+	runFirstSeen(target, user, commandName, args);
 
 	// If the command is known, let's execute it
 	// Admin commands begin with !!
 	if (commandName.slice(0, 2) === "!!") {
-		runAdminCommand(target, user, commandName);
+		runAdminCommand(target, user, commandName, args);
 	} else if (commandName.slice(0, 1) === "!") {
-		runUserCommand(target, user, commandName);
+		runUserCommand(target, user, commandName, args);
 	} else {
-		// Not a command
-
-		// Is this a new user?
-		runFirstSeen(target, user, commandName);
-
-		// Is it a trigger command
-		runTriggeredCommand(target, user, commandName);
+		// Is it a command triggered by a regular expression in chat
+		runTriggeredCommand(target, user, commandName, args);
 	}
 }
 
+
+
+function runAdminCommand(target, user, commandName) {
+	if (env.ADMIN_USERS.includes(user.username)) {
+		if (commandName === '!!clearSeen') {
+			seenUsers = [];
+			console.log(`Seen list is now ${seenUsers}`);
+		} else if (commandName.startsWith("!!delSeen ")) {
+			user = commandName.split(" ")[1];
+			for( var i = 0; i < seenUsers.length; i++){
+				if ( seenUsers[i] === user) {
+					seenUsers.splice(i, 1);
+				}
+			}
+			console.log(`Seen list is now ${seenUsers}`);
+		} else if (commandName.startsWith("!!addSeen ")) {
+			user = commandName.split(" ")[1];
+			seenUsers.push(user);
+			console.log(`Seen list is now ${seenUsers}`);
+		} else if (commandName.startsWith("!!testGreeting ")) {
+			let username = commandName.split(" ")[1];
+			user = {
+				"username": username
+			}
+			greetUser(target, user, commandName);
+		} else {
+			console.log(`Unknown admin command ${commandName}`);
+		}
+	} else {
+		console.log(`Ignoring admin command '${commandName}' from '${user.username}'`);
+	}
+}
+
+
+function runUserCommand(target, user, commandName, args) {
+	if (commandName === '!dice') {
+		runRollDice(target, user, commandName);
+	} else if(commandName.startsWith("!timer ")) {
+		runTimer(target, user, commandName, args);
+	}
+
+	// Is this a response command, that spits out canned text from the config?
+	runResponseCommands(target, user, commandName);
+
+	// Is this a command to return a random line from a a file defined in RANDOM_FILE_LINE_COMMANDS?
+	runRandomFileLineCommands(target, user, commandName);
+}
+
+function runTriggeredCommand(target, user, message, args) {
+	for(const trigger in env.TRIGGERED_MESSAGES) {
+		let regex = new RegExp(trigger);
+		if(message.match(regex)) {
+			console.log(`Found message matching ${regex}`)
+			if(env.TRIGGERED_MESSAGES[trigger]["CHAT"]) {
+				let reply = env.TRIGGERED_MESSAGES[trigger]["CHAT"].replace("USERNAME", user.username);
+				client.say(target, reply);
+			}
+			if(env.TRIGGERED_MESSAGES[trigger]["MEDIA"]) {
+				let mediaFile = env.TRIGGERED_MESSAGES[trigger]["MEDIA"].replace("USERNAME", user.username);
+				playMedia(mediaFile);
+			}
+		}
+	}
+}
+
+
 // Greet viewers the first time we see them in chat
-function runFirstSeen(target, user, commandName) {
+function runFirstSeen(target, user, commandName, args) {
 	// Don't greet the broadcaster, he doesn't like talking to themself
 	if (user.badges && user.badges.broadcaster) {
 		return;
@@ -152,65 +217,27 @@ function runResponseCommands(target, user, commandName) {
 	}
 }
 
-function runAdminCommand(target, user, commandName) {
-	if (env.ADMIN_USERS.includes(user.username)) {
-		if (commandName === '!!clearSeen') {
-			seenUsers = [];
-			console.log(`Seen list is now ${seenUsers}`);
-		} else if (commandName.startsWith("!!delSeen ")) {
-			user = commandName.split(" ")[1];
-			for( var i = 0; i < seenUsers.length; i++){
-				if ( seenUsers[i] === user) {
-					seenUsers.splice(i, 1);
-				}
-			}
-			console.log(`Seen list is now ${seenUsers}`);
-		} else if (commandName.startsWith("!!addSeen ")) {
-			user = commandName.split(" ")[1];
-			seenUsers.push(user);
-			console.log(`Seen list is now ${seenUsers}`);
-		} else if (commandName.startsWith("!!testGreeting ")) {
-			let username = commandName.split(" ")[1];
-			user = {
-				"username": username
-			}
-			greetUser(target, user, commandName);
-		} else {
-			console.log(`Unknown admin command ${commandName}`);
+function runTimer(target, user, commandName, args) {
+	let timerName = "";
+	if( (!args[2]) || isNaN(args[2]) ) {
+		client.say(target, "Missing or invalid timer length in minutes");
+		return;
+	}
+	let timeout=Number(args[2]) * 60000;
+
+	if(args[4]) {
+		timerName = args.slice(4).join("");
+	}
+	client.say(target, `Starting timer '${timerName}' for ${timeout}ms`);
+	setTimeout( (timerName)=> {
+		if(env["TIMER_ALERT"]["CHAT"]){
+			client.say(target, env["TIMER_ALERT"]["CHAT"].replace("TIMERNAME", timerName));
 		}
-	} else {
-		console.log(`Ignoring admin command '${commandName}' from '${user.username}'`);
-	}
-}
-
-
-function runUserCommand(target, user, commandName) {
-	if (commandName === '!dice') {
-		runRollDice(target, user, commandName);
-	}
-
-	// Is this a response command, that spits out canned text from the config?
-	runResponseCommands(target, user, commandName);
-
-	// Is this a command to return a random line from a a file defined in RANDOM_FILE_LINE_COMMANDS?
-	runRandomFileLineCommands(target, user, commandName);
-}
-
-function runTriggeredCommand(target, user, message) {
-	for(const trigger in env.TRIGGERED_MESSAGES) {
-		let regex = new RegExp(trigger);
-		if(message.match(regex)) {
-			console.log(`Found message matching ${regex}`)
-			if(env.TRIGGERED_MESSAGES[trigger]["CHAT"]) {
-				let reply = env.TRIGGERED_MESSAGES[trigger]["CHAT"].replace("USERNAME", user.username);
-				client.say(target, reply);
-			}
-			if(env.TRIGGERED_MESSAGES[trigger]["MEDIA"]) {
-				let mediaFile = env.TRIGGERED_MESSAGES[trigger]["MEDIA"].replace("USERNAME", user.username);
-				playMedia(mediaFile);
-			}
+		if(env["TIMER_ALERT"]["MEDIA"]) {
+			playMedia(env["TIMER_ALERT"]["MEDIA"].replace("TIMERNAME", timerName));
 		}
-	}
+	}, timeout, timerName);
+
 }
 
 

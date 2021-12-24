@@ -33,6 +33,13 @@ Features, already implemented
 * User commands can be run by everyone.  All user commands can be turned on and off in the configuration.
   * **!dice**: Rolls a dice and replies in chat with the number (1-6) rolled.
   * **!timer [MINUTES] [TIMERNAME]**: Start a timer that will wait the specified number of minutes and then alert when the timer is done, with it's name.  The alert can be a message sent to chat and/or playing a mediafile.  Example: **!timer 5 Five minutes of exercise**
+  * **Counters**: Any number of separate counters, identified by a unique word, can be tracked and updated.  The counter commands start with **!+** (increment), **!-** (decrement), **!=** (set), and **!?** (query), IMMEDIATELY followed by the word that identifies that timer (no space in between).  For increment and decrement you can specify an offet.
+    * **!+burp**: Increment the burp counter by 1, or set it to 1 if it doesn't exist
+    * **!+burp 3**: Increment the burp counter by 3, or set it to 3 if it doesn't exist
+    * **!-deaths**: Decrement the deaths counter by 1, if it wouldn't be negative
+    * **!-deaths 2**: Decrement the deaths counter by 2, if it wouldn't be negative
+    * **!=follows 5**: Set the follows counter to 5
+    * **!?donuts**: Query the donut counter.  It is never high enough.
 
 
 Features, planned

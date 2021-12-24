@@ -23,6 +23,7 @@ const url = require('url');
 //--------------------- Global variables
 var seenUsers = [];
 var browserSourceAlertContent = "";
+var counters = {};
 
 //--------------------- Config
 // First parameter is the config file to load
@@ -150,6 +151,14 @@ function runUserCommand(target, user, commandName, args) {
 		runRollDice(target, user, commandName);
 	} else if(commandName.startsWith("!timer ")) {
 		runTimer(target, user, commandName, args);
+	} else if(commandName.startsWith("!+")) {
+		counterInc(target, user, commandName, args);
+	} else if(commandName.startsWith("!-")) {
+		counterDec(target, user, commandName, args);
+	} else if(commandName.startsWith("!=")) {
+		counterSet(target, user, commandName, args);
+	}else if(commandName.startsWith("!?")) {
+		counterGet(target, user, commandName, args);
 	}
 
 	// Is this a response command, that spits out canned text from the config?
@@ -238,6 +247,52 @@ function runTimer(target, user, commandName, args) {
 		}
 	}, timeout, timerName);
 
+}
+
+function counterInc(target, user, commandName, args) {
+	let counterName = args[0].substring(2);
+	let offset = Number(args[2]);
+	if(isNaN(Number(offset))) {
+		offset = 1;
+	}
+	if(counterName in counters) {
+		counters[counterName] += offset;
+	} else {
+		counters[counterName] = 1;
+	}
+	counterGet(target, user, commandName, args);
+}
+
+function counterDec(target, user, commandName, args) {
+	let counterName = args[0].substring(2);
+	let offset = Number(args[2]);
+	if(isNaN(Number(offset))) {
+		offset = 1;
+	}
+	if(counterName in counters && (counters[counterName] - offset > 0)) {
+		counters[counterName] -= offset;
+	} else {
+		counters[counterName] = 0;
+	}
+	counterGet(target, user, commandName, args);
+}
+
+function counterSet(target, user, commandName, args) {
+	let counterName = args[0].substring(2);
+	let count = Number(args[2]);
+	if(! isNaN(Number(count))) {
+		counters[counterName] = count;
+	}
+	counterGet(target, user, commandName, args);
+}
+
+function counterGet(target, user, commandName, args) {
+	let counterName = args[0].substring(2);
+	if(counterName in counters) {
+		client.say(target, `Counter ${counterName} is currently ${counters[counterName]}`);
+	} else {
+		client.say(target, `Counter ${counterName} does not exist`);
+	}
 }
 
 

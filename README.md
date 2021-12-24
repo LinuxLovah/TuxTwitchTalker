@@ -43,7 +43,7 @@ Features, already implemented
     * **!-deaths 2**: Decrement the deaths counter by 2, set to zero if it would be negative
     * **!=follows 5**: Set the follows counter to 5
     * **!?donuts**: Query the donut counter.  It is never high enough.
-* Feature flags: Many features and commands can be enabled or disabled without changing the code.
+* **Feature flags**: Many features and commands can be enabled or disabled without changing the code.
 
 
 

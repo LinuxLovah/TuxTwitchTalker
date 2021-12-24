@@ -38,8 +38,8 @@ Features, already implemented
   * **Counters**: Any number of separate counters, identified by a unique word, can be tracked and updated.  The counter commands start with **!+** (increment), **!-** (decrement), **!=** (set), and **!?** (query), IMMEDIATELY followed by the word that identifies that timer (no space in between).  For increment and decrement you can specify an offet.
     * **!+burp**: Increment the burp counter by 1, or set it to 1 if it doesn't exist
     * **!+burp 3**: Increment the burp counter by 3, or set it to 3 if it doesn't exist
-    * **!-deaths**: Decrement the deaths counter by 1, if it wouldn't be negative
-    * **!-deaths 2**: Decrement the deaths counter by 2, if it wouldn't be negative
+    * **!-deaths**: Decrement the deaths counter by 1, set to zero if it would be negative
+    * **!-deaths 2**: Decrement the deaths counter by 2, set to zero if it would be negative
     * **!=follows 5**: Set the follows counter to 5
     * **!?donuts**: Query the donut counter.  It is never high enough.
 

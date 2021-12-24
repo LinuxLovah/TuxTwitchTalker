@@ -171,13 +171,13 @@ function runUserCommand(target, user, commandName, args) {
 function runTriggeredCommand(target, user, message, args) {
 	for(const trigger in env.TRIGGERED_MESSAGES) {
 		let regex = new RegExp(trigger);
-		if(message.match(regex)) {
+		if(message.match(regex) && trigger in env.TRIGGERED_MESSAGES) {
 			console.log(`Found message matching ${regex}`)
-			if(env.TRIGGERED_MESSAGES[trigger]["CHAT"]) {
+			if("CHAT" in env.TRIGGERED_MESSAGES[trigger]) {
 				let reply = env.TRIGGERED_MESSAGES[trigger]["CHAT"].replace("USERNAME", user.username);
 				client.say(target, reply);
 			}
-			if(env.TRIGGERED_MESSAGES[trigger]["MEDIA"]) {
+			if("MEDIA" in env.TRIGGERED_MESSAGES[trigger]) {
 				let mediaFile = env.TRIGGERED_MESSAGES[trigger]["MEDIA"].replace("USERNAME", user.username);
 				playMedia(mediaFile);
 			}
@@ -189,7 +189,7 @@ function runTriggeredCommand(target, user, message, args) {
 // Greet viewers the first time we see them in chat
 function runFirstSeen(target, user, commandName, args) {
 	// Don't greet the broadcaster, he doesn't like talking to themself
-	if (user.badges && user.badges.broadcaster) {
+	if ("badges" in user && "broadcaster" in user.badges) {
 		return;
 	}
 
@@ -212,7 +212,7 @@ function runRollDice(target, user, commandName) {
 // Some commands are to read a random line from a file.
 // These commands will be defined in the RANDOM_FILE_LINE_COMMANDS array in the config file
 function runRandomFileLineCommands(target, user, commandName) {
-	if (env.RANDOM_FILE_LINE_COMMANDS[commandName]) {
+	if (commandName in env.RANDOM_FILE_LINE_COMMANDS) {
 		var fileName = env.RANDOM_FILE_LINE_COMMANDS[commandName];
 		client.say(target, readRandomLine(fileName));
 	}
@@ -220,7 +220,7 @@ function runRandomFileLineCommands(target, user, commandName) {
 
 //Commands that send out canned text (with username substitution) from the RESPONSE_COMMANDS array
 function runResponseCommands(target, user, commandName) {
-	if (env.RESPONSE_COMMANDS && env.RESPONSE_COMMANDS[commandName]) {
+	if ("RESPONSE_COMMANDS" in env && commandName in env.RESPONSE_COMMANDS) {
 		var reply = env.RESPONSE_COMMANDS[commandName].replace('USERNAME', user.username);
 		client.say(target, reply);
 	}
@@ -239,11 +239,13 @@ function runTimer(target, user, commandName, args) {
 	}
 	client.say(target, `Starting timer '${timerName}' for ${timeout}ms`);
 	setTimeout( (timerName)=> {
-		if(env["TIMER_ALERT"]["CHAT"]){
-			client.say(target, env["TIMER_ALERT"]["CHAT"].replace("TIMERNAME", timerName));
-		}
-		if(env["TIMER_ALERT"]["MEDIA"]) {
-			playMedia(env["TIMER_ALERT"]["MEDIA"].replace("TIMERNAME", timerName));
+		if("TIMER_ALERT" in env) {
+			if("CHAT" in env["TIMER_ALERT"]){
+				client.say(target, env["TIMER_ALERT"]["CHAT"].replace("TIMERNAME", timerName));
+			}
+			if("MEDIA" in env["TIMER_ALERT"]) {
+				playMedia(env["TIMER_ALERT"]["MEDIA"].replace("TIMERNAME", timerName));
+			}
 		}
 	}, timeout, timerName);
 

@@ -17,6 +17,7 @@ Features, already implemented
 * **Greetings**: When a viewer types in chat for the first time since TuxTwitchTalker was started, they can be greeted with text sent to chat/sound file.
   * Individual regulars can have a special greeting/sound play for them
   * Mods can have a separate greeting/sound play for them
+  * Other streamers can automatically be shouted out (executes the shoutout command, does not shout them out directly)
   * There can also be a default greeting/sound for those without specific greetings.
   * Greetings can have the new viewer's username inserted in the message.
 * **Response commands**: Commands that the bot replies to with a canned message (can be used for listing alerts, social links, etc.).
@@ -42,6 +43,8 @@ Features, already implemented
     * **!-deaths 2**: Decrement the deaths counter by 2, set to zero if it would be negative
     * **!=follows 5**: Set the follows counter to 5
     * **!?donuts**: Query the donut counter.  It is never high enough.
+* Feature flags: Many features and commands can be enabled or disabled without changing the code.
+
 
 
 Features, planned

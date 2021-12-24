@@ -75,10 +75,10 @@ for(const message of env.PERIODIC_MESSAGES) {
 }
 
 //--------------------- Browser Source web server
-
-http.createServer(onWebRequest).listen(8888);
-console.log('Web server has started listing on 8888');
-
+if(isFeatureEnabled("webserver")) {
+	http.createServer(onWebRequest).listen(8888);
+	console.log('Web server has started listing on 8888');
+}
 
 //--------------------- Event Handlers
 // Called every time the bot connects to Twitch chat
@@ -149,15 +149,15 @@ function runAdminCommand(target, user, commandName) {
 function runUserCommand(target, user, commandName, args) {
 	if (commandName === '!dice') {
 		runRollDice(target, user, commandName);
-	} else if(commandName.startsWith("!timer ")) {
+	} else if(commandName.startsWith("!timer ") && isFeatureEnabled("timer")) {
 		runTimer(target, user, commandName, args);
-	} else if(commandName.startsWith("!+")) {
+	} else if(commandName.startsWith("!+") && isFeatureEnabled("counter")) {
 		counterInc(target, user, commandName, args);
-	} else if(commandName.startsWith("!-")) {
+	} else if(commandName.startsWith("!-") && isFeatureEnabled("counter")) {
 		counterDec(target, user, commandName, args);
-	} else if(commandName.startsWith("!=")) {
+	} else if(commandName.startsWith("!=") && isFeatureEnabled("counter")) {
 		counterSet(target, user, commandName, args);
-	}else if(commandName.startsWith("!?")) {
+	} else if(commandName.startsWith("!?") && isFeatureEnabled("counter")) {
 		counterGet(target, user, commandName, args);
 	}
 
@@ -202,7 +202,7 @@ function runFirstSeen(target, user, commandName, args) {
 
 // Function called when the "dice" command is issued
 function runRollDice(target, user, commandName) {
-	if (isCommandEnabled("!dice")) {
+	if (isFeatureEnabled("dice")) {
 		const sides = 6;
 		var num = Math.floor(Math.random() * sides) + 1;
 		client.say(target, `You rolled a ${num}, ${user.username}`);
@@ -323,16 +323,16 @@ function onWebRequest(request, response) {
 //--------------------- Helper Methods
 
 function greetUser(target, user, commandName) {
-	if (env.GREETINGS) {
+	if ("GREETINGS" in env) {
 		let greeting = "";
 		// Find and format greeting text
-		if (env.GREETINGS[user.username] && env.GREETINGS[user.username]["CHAT"]) {
+		if (user.username in env.GREETINGS && "CHAT" in env.GREETINGS[user.username]) {
 			greeting = env.GREETINGS[user.username]["CHAT"];
-		} else if (user.mod && env.GREETINGS["default_mod"]["CHAT"]) {
+		} else if (user.mod && "default_mod" in env.GREETINGS && "CHAT" in env.GREETINGS["default_mod"]) {
 			greeting = env.GREETINGS["default_mod"]["CHAT"];
-		} else if (user.vip && GREETINGS["default_vip"]["CHAT"]) {
+		} else if (user.vip && "default_vip" in env.GREETINGS && "CHAT" in env.GREETINGS["default_vip"]) {
 			greeting = env.GREETINGS["default_vip"]["CHAT"];
-		} else if (env.GREETINGS["default"]["CHAT"]) {
+		} else if ("CHAT" in env.GREETINGS["default"]) {
 			greeting = env.GREETINGS["default"]["CHAT"];
 		}
 
@@ -357,6 +357,15 @@ function greetUser(target, user, commandName) {
 			greeting = greeting.replace("USERNAME", user.username);
 			playMedia(greeting);
 		}
+
+		// Shout out the user.  Does not do the shouting out itself but runs your shoutout command.
+		// We want to delay this a bit so it doesn't clash with any media playing
+		if (user.username in env.GREETINGS && "SHOUTOUT" in env.GREETINGS[user.username]) {
+			greeting = env.GREETINGS[user.username]["SHOUTOUT"].replace("USERNAME", user.username);
+			setTimeout( (target, greeting)=> {
+				client.say(target, greeting);
+			}, 5000, target, greeting);
+		}
 	}
 }
 
@@ -378,8 +387,8 @@ function readRandomLine(fileName) {
 	}
 }
 
-function isCommandEnabled(command) {
-	return (env.COMMANDS_FEATURE_FLAGS[command] && env.COMMANDS_FEATURE_FLAGS[command] === "true")
+function isFeatureEnabled(command) {
+	return ("COMMANDS_FEATURE_FLAGS" in env && command in env.COMMANDS_FEATURE_FLAGS && env.COMMANDS_FEATURE_FLAGS[command] === "true")
 }
 
 function playMedia(mediaFile) {

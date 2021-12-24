@@ -35,26 +35,29 @@
 		"If the user doesn't have an entry and they are a mod, the message on the *default_mod* line will be used.",
 		"If the user doesn't have an entry and they are a VIP, the message on the *default_vip* line will be used.",
 		"If the user doesn't have an entry and they are not a mod/vip, the message on the *default* line will be used.",
+		"Within the users or the defaults, the following keys are valid:",
+		"   CHAT: Write the message into the stream's chat",
+		"   MEDIA: Play a media file",
+		"   SHOUTOUT: Write a shoutout command into the stream's chat (NOTE it just issues the command, it can't do the shoutout itself).",
 		"For all messages, the word USERNAME will be replaced with the user's real username.",
 		"This is true of media files too, so if you choose to name your media files with the username in them you can just put USERNAME in the file name and it will load the right one",
-		"I admit the JSON here may be a little confusing but there's a map for each username, and each username can have a CHAT entry and/or a MEDIA entry",
-		"If a user has a CHAT entry but no MEDIA entry, the default MEDIA entry will be used, and vice verse."
-	],
+		"If a user has a CHAT entry but no MEDIA entry, the default MEDIA entry will be used, and vice verse."	],
 	"GREETINGS": {
-		"REGULAR_1_USERNAME": {
+		"heather_gamer": {
 			"CHAT":			"Welcome, USERNAME! Man of mystery!",
 			"MEDIA":		"../sounds/order66.mp3"
 		},
-		"REGULAR_1_USERNAME": {
+		"momsspaghetti": {
 			"MEDIA":		"../sounds/get-lucky-daft-punk-flute-cover-50.mp3"
 		},
-		"REGULAR_3_USERNAME": {
+		"Bunicula": {
 			"CHAT":			"Hey everyone! USERNAME is here! Let's all tell them how much we appreciate them",
 			"MEDIA":		"../sounds/chicken_1.mp3"
 		},
-		"REGULAR_4_USERNAME": {
-			"CHAT":			"Our pal USERNAME is here. The turtle lover supreme!",
-			"MEDIA":		"../sounds/i_like_turtles.mp3"
+		"will_shand": {
+			"CHAT":			"Our fellow streamer USERNAME is here!",
+			"MEDIA":		"../sounds/i_like_turtles.mp3",
+			"SHOUTOUT":		"!so USERNAME"
 		},
 		"default_mod": {
 			"CHAT":			"Welcome to the chat, USERNAME! MOD IN DA HOUSE! Everyone look busy! BibleThump BibleThump BibleThump ",
@@ -91,7 +94,10 @@
 		"If the value is 'true', then that command will be enabled, otherwise it will be disabled."
 	],
 	"COMMANDS_FEATURE_FLAGS": {
-		"!dice": 		"true"
+		"dice": 		"true",
+		"timer":		"true",
+		"counter":		"true",
+		"webserver":	"true"
 	},
 	"COMMENT": [
 		"Periodic messages will be posted in chat... periodically.  Each entry in the array has three fields",

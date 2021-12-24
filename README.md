@@ -26,12 +26,12 @@ Features, already implemented
 *  **Triggered messages**: Messages sent to chat when a specific word or phrase is mentioned.
    *  The trigger can be a [regular expression](https://www.oreilly.com/content/an-introduction-to-regular-expressions/)
    * messages can have the sender's username inserted in the message.
-* Administrative commands that can only be executed by specific users
+* **Administrative commands** that can only be executed by specific users
   * **!!clearSeen**: Clears the list of seen users, so everyone will be greeted again when they next chat.
   *  **!!delSeen USERNAME**: Remove USERNAME from the seen list (specify a real username)
   *  **!!addSeen USERNAME**: Adds USERNAME to the seen list (specify a real username)
   *  **!!testGreeting USERNAME**: Tests the chat and media greetings for USERNAME to verify they are configured right (specify a real username)
-* User commands can be run by everyone.  All user commands can be turned on and off in the configuration.
+* **User commands** can be run by everyone.  All user commands can be turned on and off in the configuration.
   * **!dice**: Rolls a dice and replies in chat with the number (1-6) rolled.
   * **!timer [MINUTES] [TIMERNAME]**: Start a timer that will wait the specified number of minutes and then alert when the timer is done, with it's name.  The alert can be a message sent to chat and/or playing a mediafile.
     * **!timer 5 Five minutes of exercise**

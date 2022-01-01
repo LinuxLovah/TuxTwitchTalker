@@ -16,18 +16,17 @@
 	"MEDIA_PLAYER_COMMAND": "vlc -I dummy --play-and-exit MEDIAFILE",
 	"COMMENT": "This is a list of usernames that the bot should not respond to.  Add all your other bots here.",
 	"IGNORE_USERS": [
-		"Streamlabs",
 		"streamlabs",
 		"pretzelrocks"
 	],
 	"COMMENT": "This is a list of admin users that can use !! admin commands.  Make sure to add yourself and trusted mods.",
 	"ADMIN_USERS": [
-		"%YOUR_USERNAME%",
-		"%YOUR_MODS_USERNAME%"
+		"LinuxLovah",
+		"MyTrustedMod"
 	],
 	"COMMENT": "Your channel name that the bot should log into (this may change when multi-tenant is implemented)",
 	"CHANNELS": [
-		"%YOUR_CHANNEL_NAME%"
+		"LinuxLovah"
 	],
 	"COMMENT": [
 		"This is a list of regulars in your channel, and how you would like them",
@@ -39,13 +38,14 @@
 		"   CHAT: Write the message into the stream's chat",
 		"   MEDIA: Play a media file",
 		"   SHOUTOUT: Write a shoutout command into the stream's chat (NOTE it just issues the command, it can't do the shoutout itself).",
+		"For all messages, an array can be used instead of a single file, and one will be chosen at random",
 		"For all messages, the word USERNAME will be replaced with the user's real username.",
 		"This is true of media files too, so if you choose to name your media files with the username in them you can just put USERNAME in the file name and it will load the right one",
 		"If a user has a CHAT entry but no MEDIA entry, the default MEDIA entry will be used, and vice verse."	],
 	"GREETINGS": {
 		"heather_gamer": {
-			"CHAT":			"Welcome, USERNAME! Man of mystery!",
-			"MEDIA":		"../sounds/order66.mp3"
+			"CHAT":			["Welcome, USERNAME! Woman of mystery!", "Hey everyone! USERNAME is here!"],
+			"MEDIA":		["../sounds/order66.mp3", "../sounds/henlo.mp3"]
 		},
 		"momsspaghetti": {
 			"MEDIA":		"../sounds/get-lucky-daft-punk-flute-cover-50.mp3"
@@ -68,11 +68,10 @@
 			"MEDIA":		"../sounds/hello_doubtfire.mp3"
 		},
 		"default": {
-			"CHAT":			"Welcome to the chat, USERNAME!",
-			"MEDIA":		"../sounds/hello_doubtfire.mp3"
+			"CHAT":			["Welcome to the chat, USERNAME!", "USERNAME is here!"],
+			"MEDIA":		["../sounds/hello_doubtfire.mp3", "../sounds/greetings.mp3"]
 		}
 	},
-
 	"COMMENT": [
 		"This is a list of commands and associated text files.",
 		"When the command is executed, the reply will be a random line from the specified file.",
@@ -84,9 +83,10 @@
 	"COMMENT": [
 		"Response commands are commands that the bot replies to with a canned message",
 		"(can be used for listing alerts, social links, etc.).",
-		"For all messages, the word USERNAME will be replaced with the user's real username."
+		"For all messages, the word USERNAME will be replaced with the user's real username.",
+		"For all messages, an array can be used instead of a single file, and one will be chosen at random"
 	],
-		"RESPONSE_COMMANDS": {
+	"RESPONSE_COMMANDS": {
 		"!boss":		"YOU are the boss, USERNAME."
 	},
 	"COMMENT": [
@@ -129,8 +129,10 @@
 		"As with greetings, they can be CHAT or MEDIA",
 		"The word or phrase should be expressed as a regular expression",
 		"(see https://www.oreilly.com/content/an-introduction-to-regular-expressions/)",
-		"If you don't want to learn regular expressions, just use the word or phrase"
-	],
+		"If you don't want to learn regular expressions, just use the word or phrase",
+		"For all messages, an array can be used instead of a single file, and one will be chosen at random",
+		"For all messages, the word USERNAME will be replaced with the user's real username."
+],
 	"TRIGGERED_MESSAGES": {
 		"cat": {
 			"CHAT":		"Cat was mentioned",

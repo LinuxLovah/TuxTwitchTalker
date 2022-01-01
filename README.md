@@ -20,12 +20,16 @@ Features, already implemented
   * Other streamers can automatically be shouted out (executes the shoutout command, does not shout them out directly)
   * There can also be a default greeting/sound for those without specific greetings.
   * Greetings can have the new viewer's username inserted in the message.
+  * Multiple greetings can be specified in an array, and one will be picked at random
 * **Response commands**: Commands that the bot replies to with a canned message (can be used for listing alerts, social links, etc.).
   * messages can have the sender's username inserted in the message.
+  * Multiple messages can be specified in an array, and one will be picked at random
 * **Periodic messages**: Messages sent to chat at a fixed rate.  This is often used for things like social links, channel rules, etc.
 *  **Triggered messages**: Messages sent to chat when a specific word or phrase is mentioned.
    *  The trigger can be a [regular expression](https://www.oreilly.com/content/an-introduction-to-regular-expressions/)
    * messages can have the sender's username inserted in the message.
+   * Multiple messages can be specified in an array, and one will be picked at random
+
 * **Administrative commands** that can only be executed by specific users
   * **!!clearSeen**: Clears the list of seen users, so everyone will be greeted again when they next chat.
   *  **!!delSeen USERNAME**: Remove USERNAME from the seen list (specify a real username)

@@ -29,6 +29,16 @@
 		"LinuxLovah"
 	],
 	"COMMENT": [
+		"Command Feature Flags can turn on or off the pre-programmed commands",
+		"If the value is 'true', then that command will be enabled, otherwise it will be disabled."
+	],
+	"COMMANDS_FEATURE_FLAGS": {
+		"dice": 		"true",
+		"timer":		"true",
+		"counter":		"true",
+		"webserver":	"true"
+	},
+	"COMMENT": [
 		"This is a list of regulars in your channel, and how you would like them",
 		"to be greeted when they chat for the first time in the session.",
 		"If the user doesn't have an entry and they are a mod, the message on the *default_mod* line will be used.",
@@ -90,38 +100,30 @@
 		"!boss":		"YOU are the boss, USERNAME."
 	},
 	"COMMENT": [
-		"Command Feature Flags can turn on or off the pre-programmed commands",
-		"If the value is 'true', then that command will be enabled, otherwise it will be disabled."
-	],
-	"COMMANDS_FEATURE_FLAGS": {
-		"dice": 		"true",
-		"timer":		"true",
-		"counter":		"true",
-		"webserver":	"true"
-	},
-	"COMMENT": [
 		"Periodic messages will be posted in chat... periodically.  Each entry in the array has three fields",
 		"TITLE is what you call the message.  It doesn't get printed but it is logged when it loads.",
 		"INTERVAL is the number of minutes between posting the message",
-		"TEXT is the text to display in chat.",
-		"It's a good idea to not have the intervals the same or multiples so the messages don't print right after each other",
-		"In the future the message title may be used to cancel or change frequency of messages live"
+		"CHAT is the text to display in chat (optional)",
+		"MEDIA is the media to play (optional)",
+		"For CHAT and MEDIA, an array can be used instead of a single file, and one will be chosen at random",
+		"It's a good idea to not have the intervals the same or multiples so the messages don't print right after each other"
 	],
 	"PERIODIC_MESSAGES": [
 		{
 			"TITLE": 	"first_message",
 			"INTERVAL": 20,
-			"TEXT":		"Print this in chat ever 20 minutes"
+			"CHAT":		["Print this in chat ever 20 minutes", "But sometimes say this instead"],
+			"MEDIA":	"../sounds/ding-sound-effect_2.mp3"
 		},
 		{
 			"TITLE": 	"second_message",
 			"INTERVAL": 25,
-			"TEXT":		"Print this in chat ever 25 minutes"
+			"CHAT":		"Print this in chat ever 25 minutes"
 		},
 		{
 			"TITLE": 	"third_message",
 			"INTERVAL": 30,
-			"TEXT":		"Print this in chat ever 30 minutes"
+			"CHAT":		"Print this in chat ever 30 minutes"
 		}
 	],
 	"COMMENT": [

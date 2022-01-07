@@ -68,7 +68,12 @@ for(const message of env.PERIODIC_MESSAGES) {
 
 	setInterval(()=> {
 		console.log(`Posting periodic message ${message["TITLE"]} every ${message["INTERVAL"]}`);
-		client.say(channel, message["TEXT"]);
+		if("CHAT" in message) {
+			sendChat(channel, "", message["CHAT"]);
+		}
+		if("MEDIA" in message) {
+			playMedia(channel, "", message["MEDIA"]);
+		}
 	  },message["INTERVAL"] * 60000); // milliseconds = minutes * 60 * 1000
 
 
@@ -114,11 +119,13 @@ function onMessageHandler(target, user, msg) {
 
 
 
-function runAdminCommand(target, user, commandName) {
+function runAdminCommand(target, user, commandName, args) {
 	if (env.ADMIN_USERS.includes(user.username)) {
 		if (commandName === '!!clearSeen') {
 			seenUsers = [];
 			console.log(`Seen list is now ${seenUsers}`);
+		} else if (commandName === '!!exit') {
+			console.log(`Exiting due to !!exit command`);
 		} else if (commandName.startsWith("!!delSeen ")) {
 			user = commandName.split(" ")[1];
 			for( var i = 0; i < seenUsers.length; i++){
@@ -147,9 +154,9 @@ function runAdminCommand(target, user, commandName) {
 
 
 function runUserCommand(target, user, commandName, args) {
-	if (commandName === '!dice') {
+	if (commandName === '!dice' && isFeatureEnabled("dice")) {
 		runRollDice(target, user, commandName);
-	} else if(commandName.startsWith("!timer ") && isFeatureEnabled("timer")) {
+	} else if(commandName.startsWith("!timer ")) {
 		runTimer(target, user, commandName, args);
 	} else if(commandName.startsWith("!+") && isFeatureEnabled("counter")) {
 		counterInc(target, user, commandName, args);
@@ -170,16 +177,21 @@ function runUserCommand(target, user, commandName, args) {
 
 function runTriggeredCommand(target, user, message, args) {
 	for(const trigger in env.TRIGGERED_MESSAGES) {
-		let regex = new RegExp(trigger);
-		if(message.match(regex) && trigger in env.TRIGGERED_MESSAGES) {
+		const regex = new RegExp(trigger);
+		const matches = message.match(regex);
+		if(matches) {
 			console.log(`Found message matching ${regex}`)
 			if("CHAT" in env.TRIGGERED_MESSAGES[trigger]) {
-				let reply = env.TRIGGERED_MESSAGES[trigger]["CHAT"].replace("USERNAME", user.username);
-				sendChat(target, user, reply);
+				let reply = env.TRIGGERED_MESSAGES[trigger]["CHAT"];
+				sendChat(target, user, reply, matches);
 			}
 			if("MEDIA" in env.TRIGGERED_MESSAGES[trigger]) {
-				let mediaFile = env.TRIGGERED_MESSAGES[trigger]["MEDIA"].replace("USERNAME", user.username);
+				let mediaFile = env.TRIGGERED_MESSAGES[trigger]["MEDIA"];
 				playMedia(target, user, mediaFile);
+			}
+			if("SHOUTOUT" in env.TRIGGERED_MESSAGES[trigger]) {
+				let shoutOutCommand = env.TRIGGERED_MESSAGES[trigger]["SHOUTOUT"];
+				sendShoutOut(target, user, shoutOutCommand, matches);
 			}
 		}
 	}
@@ -188,7 +200,7 @@ function runTriggeredCommand(target, user, message, args) {
 
 // Greet viewers the first time we see them in chat
 function runFirstSeen(target, user, commandName, args) {
-	// Don't greet the broadcaster, he doesn't like talking to themself
+	// Don't greet the broadcaster, he doesn't like talking to themselves
 	if ("badges" in user && "broadcaster" in user.badges) {
 		return;
 	}
@@ -202,11 +214,9 @@ function runFirstSeen(target, user, commandName, args) {
 
 // Function called when the "dice" command is issued
 function runRollDice(target, user, commandName) {
-	if (isFeatureEnabled("dice")) {
-		const sides = 6;
-		var num = Math.floor(Math.random() * sides) + 1;
-		client.say(target, `You rolled a ${num}, ${user.username}`);
-	}
+	const sides = 6;
+	var num = Math.floor(Math.random() * sides) + 1;
+	client.say(target, `You rolled a ${num}, ${user.username}`);
 }
 
 // Some commands are to read a random line from a file.
@@ -239,18 +249,19 @@ function runTimer(target, user, commandName, args) {
 		timerName = args.slice(4).join("");
 	}
 	client.say(target, `Starting timer '${timerName}' for ${timeout}ms`);
-	setTimeout( (timerName)=> {
+	setTimeout( ()=> {
 		if("TIMER_ALERT" in env) {
 			if("CHAT" in env["TIMER_ALERT"]){
 				sendChat(target, user, env["TIMER_ALERT"]["CHAT"].replace("TIMERNAME", timerName));
 			}
 			if("MEDIA" in env["TIMER_ALERT"]) {
-				playMedia(target, user, env["TIMER_ALERT"]["MEDIA"].replace("TIMERNAME", timerName), user);
+				playMedia(target, user, env["TIMER_ALERT"]["MEDIA"].replace("TIMERNAME", timerName));
 			}
 		}
 	}, timeout, timerName);
 
 }
+
 
 function counterInc(target, user, commandName, args) {
 	let counterName = args[0].substring(2);
@@ -354,10 +365,7 @@ function greetUser(target, user, commandName) {
 		// Shout out the user.  Does not do the shouting out itself but runs your shoutout command.
 		// We want to delay this a bit so it doesn't clash with any media playing
 		if (user.username in env.GREETINGS && "SHOUTOUT" in env.GREETINGS[user.username]) {
-			greeting = env.GREETINGS[user.username]["SHOUTOUT"];
-			setTimeout( ()=> {
-				sendChat(target, user, greeting);
-			}, 5000, target, greeting);
+			sendShoutOut(target, user, env.GREETINGS[user.username]["SHOUTOUT"]);
 		}
 	}
 }
@@ -365,24 +373,46 @@ function greetUser(target, user, commandName) {
 
 // Send a message to chat.
 // USERNAME will be replaced by the username
+// replacements is an array of values to insert into the string replacing _1_, _2_, _3_, .etc
 // If message is an array, one will be chosen at random.
-function sendChat(target, user, message) {
+function sendChat(target, user, message, replacements) {
 	if(target && message && message.length > 0) {
+		let reply;
 		if(Array.isArray(message)) {
 			var num = Math.floor(Math.random() * message.length);
-			client.say(target, message[num].replace("USERNAME", user.username));
+			reply = message[num];
 		} else {
-			client.say(target, message.replace("USERNAME", user.username));
+			reply = message;
 		}
 
+		// Replace username
+		if(user && user.username) {
+			reply = reply.replace("USERNAME", user.username)
+		}
+
+		// replace the positional parameters
+		if(replacements) {
+			for(let index=1; index<=9 && replacements[index]; index++) {
+				reply = reply.replace(`_${index}_`, replacements[index]);
+			}
+		}
+
+		client.say(target, reply);
 	}
 }
 
+// Shout out a user.The shoutoutCommand should contain USERNAME for sendChat to replace with the username
+function sendShoutOut(target, user, shoutOutCommand, replacements) {
+	setTimeout( ()=> {
+		sendChat(target, user, shoutOutCommand, replacements);
+	}, 5000, target, user, shoutOutCommand, replacements);
+}
 
 // Play a media file.
 // USERNAME will be replaced by the username for per-username sounds
+// replacements is an array of values to insert into the string replacing _1_, _2_, _3_, .etc
 // If media is an array, one will be chosen at random.
-function playMedia(target, user, media) {
+function playMedia(target, user, media, replacements) {
 	if(env.MEDIA_PLAYER_COMMAND && media && media.length > 0) {
 		let file;
 		if(Array.isArray(media)) {
@@ -391,7 +421,19 @@ function playMedia(target, user, media) {
 		} else {
 			file = media;
 		}
-		let command = env.MEDIA_PLAYER_COMMAND.replace("MEDIAFILE",file).replace("USERNAME", user.username);
+		let command = env.MEDIA_PLAYER_COMMAND.replace("MEDIAFILE",file);
+
+		// Replace username
+		if(user && user.username) {
+			command = command.replace("USERNAME", user.username)
+		}
+
+		// replace the positional parameters
+		if(replacements) {
+			for(let index=1; index<=9 && replacements[index]; index++) {
+				command = command.replace(`_${index}_`, replacements[index]);
+			}
+		}
 
 		exec(command, (error, stdout, stderr) => {
 			if (error) {

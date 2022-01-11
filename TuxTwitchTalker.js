@@ -63,18 +63,18 @@ client.connect();
 
 
 //--------------------- Periodic messages
-for(const message of env.PERIODIC_MESSAGES) {
-	console.log(`Loading periodic message '${message["TITLE"]}'`);
+for(const periodicMessage in env.PERIODIC_MESSAGES) {
+	console.log(`Loading periodic message '${periodicMessage}'`);
 
 	setInterval(()=> {
-		console.log(`Posting periodic message ${message["TITLE"]} every ${message["INTERVAL"]}`);
-		if("CHAT" in message) {
-			sendChat(channel, "", message["CHAT"]);
+		console.log(`Posting periodic message ${periodicMessage} every ${env.PERIODIC_MESSAGES[periodicMessage]["INTERVAL"]} minute`);
+		if("CHAT" in env.PERIODIC_MESSAGES[periodicMessage]) {
+			sendChat(channel, "", env.PERIODIC_MESSAGES[periodicMessage]["CHAT"]);
 		}
-		if("MEDIA" in message) {
-			playMedia(channel, "", message["MEDIA"]);
+		if("MEDIA" in env.PERIODIC_MESSAGES[periodicMessage]) {
+			playMedia(channel, "", env.PERIODIC_MESSAGES[periodicMessage]["MEDIA"]);
 		}
-	  },message["INTERVAL"] * 60000); // milliseconds = minutes * 60 * 1000
+	  },env.PERIODIC_MESSAGES[periodicMessage]["INTERVAL"] * 60000); // milliseconds = minutes * 60 * 1000
 
 
 }
@@ -92,7 +92,7 @@ function onConnectedHandler(addr, port) {
 }
 
 
-// Called every time a message comes in
+// Called every time a message comes in.  This is effectively the main chat processing loop.
 function onMessageHandler(target, user, msg) {
 	if (env.IGNORE_USERS.includes(user.username)) {
 		return;
@@ -100,6 +100,7 @@ function onMessageHandler(target, user, msg) {
 
 	// Remove whitespace from chat message
 	let commandName = msg.replace(/[^\x20-\x7E]/g, '').trim();
+	// Split arguments once here for all commands to use
 	let args = commandName.split(/(\s+)/)
 
 	// If we haven't seen this user before, greet them
@@ -111,10 +112,10 @@ function onMessageHandler(target, user, msg) {
 		runAdminCommand(target, user, commandName, args);
 	} else if (commandName.slice(0, 1) === "!") {
 		runUserCommand(target, user, commandName, args);
-	} else {
-		// Is it a command triggered by a regular expression in chat
-		runTriggeredCommand(target, user, commandName, args);
 	}
+
+	// Is it a command triggered by a regular expression in chat
+	runTriggeredCommand(target, user, commandName, args);
 }
 
 
@@ -167,9 +168,6 @@ function runUserCommand(target, user, commandName, args) {
 	} else if(commandName.startsWith("!?") && isFeatureEnabled("counter")) {
 		counterGet(target, user, commandName, args);
 	}
-
-	// Is this a response command, that spits out canned text from the config?
-	runResponseCommands(target, user, commandName);
 
 	// Is this a command to return a random line from a a file defined in RANDOM_FILE_LINE_COMMANDS?
 	runRandomFileLineCommands(target, user, commandName);
@@ -228,15 +226,8 @@ function runRandomFileLineCommands(target, user, commandName) {
 	}
 }
 
-//Commands that send out canned text (with username substitution) from the RESPONSE_COMMANDS array
-function runResponseCommands(target, user, commandName) {
-	if ("RESPONSE_COMMANDS" in env && commandName in env.RESPONSE_COMMANDS) {
-		var reply = env.RESPONSE_COMMANDS[commandName];
-		sendChat(target, user, reply);
-	}
-}
-
-// Start a time, responding as per the TIMER_ALERT entries
+// Start a timer with the !timer command.  When the time is up,
+// the CHAT entry will be sent to chat and/or MEDIA entry played
 function runTimer(target, user, commandName, args) {
 	let timerName = "";
 	if( (!args[2]) || isNaN(args[2]) ) {

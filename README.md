@@ -5,34 +5,33 @@ Introduction
 ---
 TuxTwitchTalker is a chat bot to connect to a Twitch channel and add functionality, respond to events, etc.  All of the functionality released so far are independent of the streaming software you use, as it only connects to Twitch (that may change in the future).
 
-Some of the features (like playing sounds in response to events) are only effective if running on the streaming computer, but most could run on any computer, since most of the functionality is interacting with chat.
+Some of the features (like playing media in response to events) are only effective if running on the streaming computer, but most could run on any computer, since most of the functionality is interacting with chat.
 
 TuxTwitchTalker is written on NodeJS, and should work on pretty much any operating system and the slowest of computers.  It uses the [tmi Twitch library](https://tmijs.com/) to interact with chat.  The software is designed so that its configuration drives all its functionality, so streamers should not have to change the code at all to customize the advertised features to their stream.
 
 A part of my motivation to create TuxTwitchTalker was to help myself and others move away from tools that are offered by companies we would rather not be associated with.  It's no coincidence that the first release of this bot is shortly after Streamlabs (no, I'm not going to link to their website) made several marketing blunders exposing just how much of their IP they copied from other companies, many of which were not treated well.
 
+Most users will not need to change (or even understand) the program itself.  All configuration is done via a [JSON file](https://en.wikipedia.org/wiki/JSON).  It has extensive comments in it to help you customize it for your needs.
+
+This program is, and always will be, free and open source.  See **Licensing** below.
 
 Features, already implemented
 ---
-* **Greetings**: When a viewer types in chat for the first time since TuxTwitchTalker was started, they can be greeted with text sent to chat/sound file.
-  * Individual regulars can have a special greeting/sound play for them
-  * Mods can have a separate greeting/sound play for them
+* **Greetings**: When a viewer types in chat for the first time since TuxTwitchTalker was started, they can be greeted with text sent to chat/media file.
+  * Individual regular viewers can have a special greeting/media play for them
+  * Mods can have a separate greeting/media play for them
+  * VIPs can have a separate greeting/media play for them
   * Other streamers can automatically be shouted out (executes the shoutout command, does not shout them out directly)
-  * There can also be a default greeting/sound for those without specific greetings.
+  * There can also be a default greeting/media for those without specific greetings.
   * Greetings can have the new viewer's username inserted in the message.
   * Multiple greetings can be specified in an array, and one will be picked at random
-* **Response commands**: Commands that the bot replies to with a canned message (can be used for listing alerts, social links, etc.).
-  * messages can have the sender's username inserted in the message.
-  * Multiple messages can be specified in an array, and one will be picked at random
-* **Periodic messages**: Messages sent to chat at a fixed rate.  This is often used for things like social links, channel rules, etc.
-*  **Triggered messages**: Messages sent to chat when a specific word or phrase is mentioned.
+* **Periodic messages**: Messages sent to chat at a fixed rate.  This is often used for things like social links, channel rules, making up !commands, etc.
+*  **Triggered messages**: Messages sent to chat when a specific word or phrase is mentioned.  This can be used for thanking subscribers/followers/raiders, responding to a phrase with a media file or message, etc.
    *  The trigger can be a [regular expression](https://www.oreilly.com/content/an-introduction-to-regular-expressions/)
    * messages can have the sender's username inserted in the message.
    * Multiple messages can be specified in an array, and one will be picked at random
- *  **Sub and raid messages**: Send a message to chat and/or play media when someone subscribes, subscribes for multiple months, gifts a subscription, or raids.
-
-* **Administrative commands** that can only be executed by specific users
-  * **!!clearSeen**: Clears the list of seen users, so everyone will be greeted again when they next chat.
+* **Administrative commands** that can only be executed by specific users you specify in the configuration file.
+  * **!!clearSeen**: Clears the list of seen users, so they will be greeted again when they next chat.
   *  **!!delSeen USERNAME**: Remove USERNAME from the seen list (specify a real username)
   *  **!!addSeen USERNAME**: Adds USERNAME to the seen list (specify a real username)
   *  **!!testGreeting USERNAME**: Tests the chat and media greetings for USERNAME to verify they are configured right (specify a real username)
@@ -55,17 +54,17 @@ Features, already implemented
 
 Features, planned
 ---
-* Greeting/sound on raid
-* Greeting/sound on host
-* Greeting/sound on follow
-* Greeting/sound on sub/resub
-* Greeting/sound on gift sub
+* Greeting/media on raid
+* Greeting/media on host
+* Greeting/media on follow
+* Greeting/media on sub/resub
+* Greeting/media on gift sub
 * Automatic shout-outs for a set list of users
 
 
 Features, long term
 ---
-* A way to alert with video in addition to sounds and chat messages
+* A way to alert with video in addition to media and chat messages
 * A way to replace Streamlabs Labels to update files with latest follower, latest sub, etc.
 * Multi-tenant redesign so that one instance of TuxTwitchTalker can respond to the chat for multiple streamers, each with their separate configuration.
 * Browser source to push visual content to broadcasting software
@@ -83,7 +82,7 @@ In essence, anyone can use TuxTwitchTalker, but I don't want a company (like Str
 
 Installation
 ---
-To take full advantage of TuxTwitchTalker's features, it should be installed on your streaming computer.  You can install it on any computer, but some functionality, like playing sounds over stream, won't be sent to your broadcast.
+To take full advantage of TuxTwitchTalker's features, it should be installed on your streaming computer.  You can install it on any computer, but some functionality, like playing media over stream, won't be sent to your broadcast.
 
 1. [Install NodeJS](https://nodejs.org/en/download/) as per their directions for your platform.
 2. Clone [my repository](https://github.com/LinuxLovah/TuxTwitchTalker) or download and expand the contents into some directory.

@@ -25,6 +25,19 @@ var seenUsers = [];
 var browserSourceAlertContent = "";
 var counters = {};
 
+//--------------------- Constants
+const cCHAT 			= "CHAT";
+const cDEFAULT 			= "default";
+const cDEFAULT_MOD 		= "default_mod";
+const cDEFAULT_VIP 		= "default_vip";
+const cFEATURE_FLAGS	= "COMMANDS_FEATURE_FLAGS";
+const cMEDIA 			= "MEDIA";
+const cMEDIAFILE		= "MEDIAFILE";
+const cSHOUTOUT 		= "SHOUTOUT";
+const cTIMER_ALERT 		= "TIMER_ALERT";
+const cTIMERNAME 		= "TIMERNAME";
+const cUSERNAME			= "USERNAME";
+
 //--------------------- Config
 // First parameter is the config file to load
 // Default is "./config.json"
@@ -68,11 +81,11 @@ for(const periodicMessage in env.PERIODIC_MESSAGES) {
 
 	setInterval(()=> {
 		console.log(`Posting periodic message ${periodicMessage} every ${env.PERIODIC_MESSAGES[periodicMessage]["INTERVAL"]} minute`);
-		if("CHAT" in env.PERIODIC_MESSAGES[periodicMessage]) {
-			sendChat(channel, "", env.PERIODIC_MESSAGES[periodicMessage]["CHAT"]);
+		if(cCHAT in env.PERIODIC_MESSAGES[periodicMessage]) {
+			sendChat(channel, "", env.PERIODIC_MESSAGES[periodicMessage][cCHAT]);
 		}
-		if("MEDIA" in env.PERIODIC_MESSAGES[periodicMessage]) {
-			playMedia(channel, "", env.PERIODIC_MESSAGES[periodicMessage]["MEDIA"]);
+		if(cMEDIA in env.PERIODIC_MESSAGES[periodicMessage]) {
+			playMedia(channel, "", env.PERIODIC_MESSAGES[periodicMessage][cMEDIA]);
 		}
 	  },env.PERIODIC_MESSAGES[periodicMessage]["INTERVAL"] * 60000); // milliseconds = minutes * 60 * 1000
 
@@ -179,16 +192,16 @@ function runTriggeredCommand(target, user, message, args) {
 		const matches = message.match(regex);
 		if(matches) {
 			console.log(`Found message matching ${regex}`)
-			if("CHAT" in env.TRIGGERED_MESSAGES[trigger]) {
-				let reply = env.TRIGGERED_MESSAGES[trigger]["CHAT"];
+			if(cCHAT in env.TRIGGERED_MESSAGES[trigger]) {
+				let reply = env.TRIGGERED_MESSAGES[trigger][cCHAT];
 				sendChat(target, user, reply, matches);
 			}
-			if("MEDIA" in env.TRIGGERED_MESSAGES[trigger]) {
-				let mediaFile = env.TRIGGERED_MESSAGES[trigger]["MEDIA"];
+			if(cMEDIA in env.TRIGGERED_MESSAGES[trigger]) {
+				let mediaFile = env.TRIGGERED_MESSAGES[trigger][cMEDIA];
 				playMedia(target, user, mediaFile);
 			}
-			if("SHOUTOUT" in env.TRIGGERED_MESSAGES[trigger]) {
-				let shoutOutCommand = env.TRIGGERED_MESSAGES[trigger]["SHOUTOUT"];
+			if(cSHOUTOUT in env.TRIGGERED_MESSAGES[trigger]) {
+				let shoutOutCommand = env.TRIGGERED_MESSAGES[trigger][cSHOUTOUT];
 				sendShoutOut(target, user, shoutOutCommand, matches);
 			}
 		}
@@ -241,12 +254,12 @@ function runTimer(target, user, commandName, args) {
 	}
 	client.say(target, `Starting timer '${timerName}' for ${timeout}ms`);
 	setTimeout( ()=> {
-		if("TIMER_ALERT" in env) {
-			if("CHAT" in env["TIMER_ALERT"]){
-				sendChat(target, user, env["TIMER_ALERT"]["CHAT"].replace("TIMERNAME", timerName));
+		if(cTIMER_ALERT in env) {
+			if(cCHAT in env[cTIMER_ALERT]){
+				sendChat(target, user, env[cTIMER_ALERT][cCHAT].replace(cTIMERNAME, timerName));
 			}
-			if("MEDIA" in env["TIMER_ALERT"]) {
-				playMedia(target, user, env["TIMER_ALERT"]["MEDIA"].replace("TIMERNAME", timerName));
+			if(cMEDIA in env[cTIMER_ALERT]) {
+				playMedia(target, user, env[cTIMER_ALERT][cMEDIA].replace(cTIMERNAME, timerName));
 			}
 		}
 	}, timeout, timerName);
@@ -329,34 +342,34 @@ function greetUser(target, user, commandName) {
 	if ("GREETINGS" in env) {
 		let greeting = "";
 		// Find and format greeting text
-		if (user.username in env.GREETINGS && "CHAT" in env.GREETINGS[user.username]) {
-			greeting = env.GREETINGS[user.username]["CHAT"];
-		} else if (user.mod && "default_mod" in env.GREETINGS && "CHAT" in env.GREETINGS["default_mod"]) {
-			greeting = env.GREETINGS["default_mod"]["CHAT"];
-		} else if (user.vip && "default_vip" in env.GREETINGS && "CHAT" in env.GREETINGS["default_vip"]) {
-			greeting = env.GREETINGS["default_vip"]["CHAT"];
-		} else if ("CHAT" in env.GREETINGS["default"]) {
-			greeting = env.GREETINGS["default"]["CHAT"];
+		if (user.username in env.GREETINGS && cCHAT in env.GREETINGS[user.username]) {
+			greeting = env.GREETINGS[user.username][cCHAT];
+		} else if (user.mod && cDEFAULT_MOD in env.GREETINGS && cCHAT in env.GREETINGS[cDEFAULT_MOD]) {
+			greeting = env.GREETINGS[cDEFAULT_MOD][cCHAT];
+		} else if (user.vip && cDEFAULT_VIP in env.GREETINGS && cCHAT in env.GREETINGS[cDEFAULT_VIP]) {
+			greeting = env.GREETINGS[cDEFAULT_VIP][cCHAT];
+		} else if (cCHAT in env.GREETINGS[cDEFAULT]) {
+			greeting = env.GREETINGS[cDEFAULT][cCHAT];
 		}
 		sendChat(target, user, greeting);
 
 		// Find and play media
 		greeting = "";
-		if (env.GREETINGS[user.username] && env.GREETINGS[user.username]["MEDIA"]) {
-			greeting = env.GREETINGS[user.username]["MEDIA"];
-		} else if (user.mod && env.GREETINGS["default_mod"]["MEDIA"]) {
-			greeting = env.GREETINGS["default_mod"]["MEDIA"];
-		} else if (user.vip && GREETINGS["default_vip"]["MEDIA"]) {
-			greeting = env.GREETINGS["default_vip"]["MEDIA"];
-		} else if (env.GREETINGS["default"]["MEDIA"]) {
-			greeting = env.GREETINGS["default"]["MEDIA"];
+		if (env.GREETINGS[user.username] && env.GREETINGS[user.username][cMEDIA]) {
+			greeting = env.GREETINGS[user.username][cMEDIA];
+		} else if (user.mod && env.GREETINGS[cDEFAULT_MOD][cMEDIA]) {
+			greeting = env.GREETINGS[cDEFAULT_MOD][cMEDIA];
+		} else if (user.vip && GREETINGS[cDEFAULT_VIP][cMEDIA]) {
+			greeting = env.GREETINGS[cDEFAULT_VIP][cMEDIA];
+		} else if (env.GREETINGS[cDEFAULT][cMEDIA]) {
+			greeting = env.GREETINGS[cDEFAULT][cMEDIA];
 		}
 		playMedia(target, user, greeting);
 
 		// Shout out the user.  Does not do the shouting out itself but runs your shoutout command.
 		// We want to delay this a bit so it doesn't clash with any media playing
-		if (user.username in env.GREETINGS && "SHOUTOUT" in env.GREETINGS[user.username]) {
-			sendShoutOut(target, user, env.GREETINGS[user.username]["SHOUTOUT"]);
+		if (user.username in env.GREETINGS && cSHOUTOUT in env.GREETINGS[user.username]) {
+			sendShoutOut(target, user, env.GREETINGS[user.username][cSHOUTOUT]);
 		}
 	}
 }
@@ -378,7 +391,7 @@ function sendChat(target, user, message, replacements) {
 
 		// Replace username
 		if(user && user.username) {
-			reply = reply.replace("USERNAME", user.username)
+			reply = reply.replace(cUSERNAME, user.username)
 		}
 
 		// replace the positional parameters
@@ -412,11 +425,11 @@ function playMedia(target, user, media, replacements) {
 		} else {
 			file = media;
 		}
-		let command = env.MEDIA_PLAYER_COMMAND.replace("MEDIAFILE",file);
+		let command = env.MEDIA_PLAYER_COMMAND.replace(cMEDIAFILE, file);
 
 		// Replace username
 		if(user && user.username) {
-			command = command.replace("USERNAME", user.username)
+			command = command.replace(cUSERNAME, user.username)
 		}
 
 		// replace the positional parameters
@@ -463,5 +476,5 @@ function readRandomLine(fileName) {
 }
 
 function isFeatureEnabled(command) {
-	return ("COMMANDS_FEATURE_FLAGS" in env && command in env.COMMANDS_FEATURE_FLAGS && env.COMMANDS_FEATURE_FLAGS[command] === "true")
+	return (cFEATURE_FLAGS in env && command in env.COMMANDS_FEATURE_FLAGS && env.COMMANDS_FEATURE_FLAGS[command] === "true")
 }

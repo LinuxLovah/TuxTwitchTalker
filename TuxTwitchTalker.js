@@ -74,6 +74,13 @@ client.on('message', onMessageHandler);
 // Connect to Twitch:
 client.connect();
 
+// If the bot dies, say so in chat
+process.on('uncaughtException', function(err) {
+		console.log("*** ERROR: UNHANDLED EXCEPTION ***");
+		console.log(err);
+		client.say(env.CHANNELS, `${env.BOT_NAME} technical difficulties, please check logs!`);
+	}
+);
 
 //--------------------- Periodic messages
 for(const periodicMessage in env.PERIODIC_MESSAGES) {
@@ -212,8 +219,18 @@ function runTriggeredCommand(target, user, message, args) {
 // Greet viewers the first time we see them in chat
 function runFirstSeen(target, user, commandName, args) {
 	// Don't greet the broadcaster, he doesn't like talking to themselves
-	if ("badges" in user && "broadcaster" in user.badges) {
-		return;
+	// This code sometimes throws " TypeError: Cannot use 'in' operator to search for 'broadcaster' in null"
+	// which shouldn't happen, so I'm catching it until I can understand it better
+	try {
+		if ("badges" in user && user.badges && "broadcaster" in user.badges) {
+			return;
+		}
+	} catch(err) {
+		console.log("Caught error checking for broadcaster:");
+		console.log(err);
+		console.log("user object:");
+		console.log(JSON.stringify(user, null, 2));
+		console.log("Ignoring error");
 	}
 
 	if (!seenUsers.includes(user.username)) {

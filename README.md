@@ -48,6 +48,7 @@ Features, already implemented
     * **!-deaths 2**: Decrement the deaths counter by 2, set to zero if it would be negative
     * **!=follows 5**: Set the follows counter to 5
     * **!?donuts**: Query the donut counter.  It is never high enough.
+  * **Random File Line Commands**: Send a random line from a text file to chat when a command is executed.  This can be used for random facts, choosing from a collection of things, pick a random reward from a list, whatever you want.  This is really unique functionality.  As shipped, the bot is configured with a !dadjoke command that will send a random joke from a file to chat.
 * **Feature flags**: Many features and commands can be enabled or disabled without changing the code.
 
 

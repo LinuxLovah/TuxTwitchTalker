@@ -7,13 +7,12 @@
     "start": "node TuxTwitchTalker"
   },
   "dependencies": {
-    "dependencies": "1.1",
     "express": "^4.17.1",
     "json-schema": "^0.4.0",
     "tmi.js": "^1.8.5"
   },
   "engines": {
-    "node": "8.x"
+    "node": ">=10.0.0"
   },
   "repository": {
     "url": "https://glitch.com/edit/#!/twitch-chatbot"

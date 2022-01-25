@@ -226,6 +226,11 @@ function runTriggeredCommand(target, user, message, args) {
 
 
 function runForbiddenPhrases(target, user, message, args) {
+	// We dont want to take actions against mods and VIPs automatically
+	if(user.mod || user.vip) {
+		return;
+	}
+
 	for(const trigger in env.FORBIDDEN_PHRASES) {
 		const regex = new RegExp(trigger);
 		const matches = message.match(regex);

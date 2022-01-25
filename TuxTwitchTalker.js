@@ -26,6 +26,7 @@ var browserSourceAlertContent = "";
 var counters = {};
 
 //--------------------- Constants
+const cBAN				= "BAN";
 const cCHAT 			= "CHAT";
 const cDEFAULT 			= "default";
 const cDEFAULT_MOD 		= "default_mod";
@@ -36,6 +37,7 @@ const cMEDIAFILE		= "MEDIAFILE";
 const cSHOUTOUT 		= "SHOUTOUT";
 const cTIMER_ALERT 		= "TIMER_ALERT";
 const cTIMERNAME 		= "TIMERNAME";
+const cTIMEOUT			= "TIMEOUT";
 const cUSERNAME			= "USERNAME";
 
 //--------------------- Config
@@ -134,6 +136,9 @@ function onMessageHandler(target, user, msg) {
 		runUserCommand(target, user, commandName, args);
 	}
 
+	// Does the post contain forbidden phrases?
+	runForbiddenPhrases(target, user, commandName, args);
+
 	// Is it a command triggered by a regular expression in chat
 	runTriggeredCommand(target, user, commandName, args);
 }
@@ -202,7 +207,7 @@ function runTriggeredCommand(target, user, message, args) {
 		const regex = new RegExp(trigger);
 		const matches = message.match(regex);
 		if(matches) {
-			console.log(`Found message matching ${regex}`)
+			console.log(`Found message matching ${regex}`);
 			if(cCHAT in env.TRIGGERED_MESSAGES[trigger]) {
 				let reply = env.TRIGGERED_MESSAGES[trigger][cCHAT];
 				sendChat(target, user, reply, matches);
@@ -214,6 +219,29 @@ function runTriggeredCommand(target, user, message, args) {
 			if(cSHOUTOUT in env.TRIGGERED_MESSAGES[trigger]) {
 				let shoutOutCommand = env.TRIGGERED_MESSAGES[trigger][cSHOUTOUT];
 				sendShoutOut(target, user, shoutOutCommand, matches);
+			}
+		}
+	}
+}
+
+
+function runForbiddenPhrases(target, user, message, args) {
+	for(const trigger in env.FORBIDDEN_PHRASES) {
+		const regex = new RegExp(trigger);
+		const matches = message.match(regex);
+		if(matches) {
+			console.log(`Found forbidden message matching ${regex}`);
+			if(cCHAT in env.FORBIDDEN_PHRASES[trigger]) {
+				let reply = env.FORBIDDEN_PHRASES[trigger][cCHAT];
+				sendChat(target, user, reply, matches);
+			}
+			if(cTIMEOUT in env.FORBIDDEN_PHRASES[trigger]) {
+				let timeoutSeconds = env.FORBIDDEN_PHRASES[trigger][cTIMEOUT];
+				console.log(`Timing out user ${user.username}`);
+				sendChat(target, user, `/timeout ${user.username} ${timeoutSeconds}`, matches);
+			}
+			if(cBAN in env.FORBIDDEN_PHRASES[trigger]) {
+				sendChat(target, user, `/ban ${user.username}`, matches);
 			}
 		}
 	}

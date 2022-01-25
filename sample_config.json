@@ -52,7 +52,8 @@
 		"dice": 		"true",
 		"timer":		"true",
 		"counter":		"true",
-		"webserver":	"true"
+		"webserver":	"true",
+		"greetings":	"true"
 	},
 	"COMMENT_GREETINGS": [
 		"This is a list of regulars in your channel, and how you would like them",
@@ -159,6 +160,30 @@
 			"MEDIA":	"../sounds/laughter-short.mp3"
 		},		"^!boss":  {
 			"CHAT":		"YOU da boss, USERNAME!"
+		}
+	},
+	"COMMENT_FORBIDDEN_PHRASES": [
+		"Forbidden phrases are regular expressions that will cause the user to be banned or timed out, and a message sent to chat",
+		"The allowed objects in the responses are CHAT, BLOCK, BAN, and TIMEOUT.  TIMEOUT can specify the number of seconds to time out for",
+		"The word or phrase should be expressed as a regular expression",
+		"(see https://www.oreilly.com/content/an-introduction-to-regular-expressions/)",
+		"If you don't want to learn regular expressions, just use the word or phrase",
+		"If you want to make sure the word or phrase is used at the beginning of a line, like a !command, put a caret (^) before it",
+		"Advanced: If you use capture groups in the regex, you can insert those matches in the chat string",
+		"by putting in _1_ for the first parameter, _2_ for the second parameter, etc.  This allows complex",
+		"responses using the line from chat, like thanking subscribers"
+	],
+	"FORBIDDEN_PHRASES": {
+		"pineapple on pizza": {
+			"CHAT":		"USERNAME mentioned cursed pizza!",
+			"TIMEOUT":	"30"
+		},
+		"[Vv]oldemort": {
+			"CHAT":		["Who? Tom Riddle?", "HE WHO MUST NOT BE NAMED!!"]
+		},
+		"Dubs are better than subs": {
+			"CHAT":		"We do not allow that kind of talk here.  BANNED!",
+			"BAN":		"true"
 		}
 	},
 	"COMMENT_TIMER_ALERT": [

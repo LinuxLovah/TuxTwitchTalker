@@ -30,7 +30,13 @@ Features, already implemented
    *  The trigger can be a [regular expression](https://www.oreilly.com/content/an-introduction-to-regular-expressions/)
    * messages can have the sender's username inserted in the message.
    * Multiple messages can be specified in an array, and one will be picked at random
+*  **Forbidden phrases**: When a specific word or phrase is mentioned, the user can be just warned, they can be timed out for a specified number of seconds, or they can be banned.
+   *  The trigger can be a [regular expression](https://www.oreilly.com/content/an-introduction-to-regular-expressions/)
+   * messages can have the sender's username inserted in the message.
+   * Multiple messages can be specified in an array, and one will be picked at random
 * **Administrative commands** that can only be executed by specific users you specify in the configuration file.
+  *  **!!greetingsOff** Disable greeting feature
+  *  **!!greetingsOn** Enable greeting feature
   * **!!clearSeen**: Clears the list of seen users, so they will be greeted again when they next chat.
   *  **!!delSeen USERNAME**: Remove USERNAME from the seen list (specify a real username)
   *  **!!addSeen USERNAME**: Adds USERNAME to the seen list (specify a real username)

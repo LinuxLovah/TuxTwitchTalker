@@ -165,6 +165,10 @@ function runAdminCommand(target, user, commandName, args) {
 				"username": username
 			}
 			greetUser(target, user, commandName);
+		} else if (commandName === "!!greetingsOn") {
+			enableFeature("greetings");
+		} else if (commandName === "!!greetingsOff") {
+			disableFeature("greetings");
 		} else {
 			console.log(`Unknown admin command ${commandName}`);
 		}
@@ -356,7 +360,7 @@ function onWebRequest(request, response) {
 //--------------------- Helper Methods
 
 function greetUser(target, user, commandName) {
-	if ("GREETINGS" in env) {
+	if ("GREETINGS" in env && isFeatureEnabled("greetings")) {
 		let greeting = "";
 		// Find and format greeting text
 		if (user.username in env.GREETINGS && cCHAT in env.GREETINGS[user.username]) {
@@ -494,4 +498,12 @@ function readRandomLine(fileName) {
 
 function isFeatureEnabled(command) {
 	return (cFEATURE_FLAGS in env && command in env.COMMANDS_FEATURE_FLAGS && env.COMMANDS_FEATURE_FLAGS[command] === "true")
+}
+
+function enableFeature(command) {
+	env.COMMANDS_FEATURE_FLAGS[command] = "true";
+}
+
+function disableFeature(command) {
+	env.COMMANDS_FEATURE_FLAGS[command] = "false";
 }

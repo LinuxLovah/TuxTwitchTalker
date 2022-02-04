@@ -34,6 +34,7 @@ Features, already implemented
    *  The trigger can be a [regular expression](https://www.oreilly.com/content/an-introduction-to-regular-expressions/)
    * messages can have the sender's username inserted in the message.
    * Multiple messages can be specified in an array, and one will be picked at random
+   * Forbidden phrases can be optionally disabled for mods and VIPs via feature flag
 * **Administrative commands** that can only be executed by specific users you specify in the configuration file.
   *  **!!greetingsOff** Disable greeting feature
   *  **!!greetingsOn** Enable greeting feature

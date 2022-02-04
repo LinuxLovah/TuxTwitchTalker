@@ -227,7 +227,12 @@ function runTriggeredCommand(target, user, message, args) {
 
 function runForbiddenPhrases(target, user, message, args) {
 	// We dont want to take actions against mods and VIPs automatically
-	if(user.mod || user.vip) {
+	// However, if the feature flag forbiddenForModsVIPs is true then we will
+	// We never want to trigger for the broadcaster though
+	if( (! isFeatureEnabled("forbiddenForModsVIPs")) && (user.mod || user.vip) ) {
+		return;
+	}
+	if("badges" in user && user.badges && "broadcaster" in user.badges) {
 		return;
 	}
 

@@ -67,7 +67,6 @@ Features, planned
 * Greeting/media on follow
 * Greeting/media on sub/resub
 * Greeting/media on gift sub
-* Automatic shout-outs for a set list of users
 
 
 Features, long term
@@ -87,14 +86,23 @@ TuxTwitchTalker is released under the [Apache 2.0 licence ](https://www.apache.o
 
 In essence, anyone can use TuxTwitchTalker, but I don't want a company (like Streamlabs) to take it and sell it as a commercial product.  It will ALWAYS be free and open source.
 
+Prerequisites
+---
+Unless you are going to run your bot as your username, which might be confusing to viewers, you may want to create a completely separate Twitch account for your bot to log in as and[register your bot with Twitch](https://dev.twitch.tv/docs/authentication#registration) to get the OAuth token you will need to put in the configuration file.
 
 Installation
 ---
 To take full advantage of TuxTwitchTalker's features, it should be installed on your streaming computer.  You can install it on any computer, but some functionality, like playing media over stream, won't be sent to your broadcast.
 
+
 1. [Install NodeJS](https://nodejs.org/en/download/) as per their directions for your platform.
-2. Clone [my repository](https://github.com/LinuxLovah/TuxTwitchTalker) or download and expand the contents into some directory.
+2. Clone my repository by running
+
+    > **git clone https://github.com/LinuxLovah/TuxTwitchTalker**
+
+	or [download](https://github.com/LinuxLovah/TuxTwitchTalker/archive/refs/heads/main.zip) and expand the contents into some directory.  If you clone the repository, it makes it much easier to keep it updated.
 3. Run **npm install** in the project directory to install all the NodeJS modules the project depends on.
+
 
 
 Configuration

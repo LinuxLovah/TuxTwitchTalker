@@ -160,7 +160,23 @@
 			"MEDIA":	"../sounds/laughter-short.mp3"
 		},		"^!boss":  {
 			"CHAT":		"YOU da boss, USERNAME!"
+		},
+		"^!pronouns": {
+			"CHAT":		"There are plugins to display Twitch users' pronouns next to their name to promote inclusiveness!  * * * Chrome: https://chrome.google.com/webstore/detail/twitch-chat-pronouns/agnfbjmjkdncblnkpkgoefbpogemfcii  * * * Firefox: https://addons.mozilla.org/en-US/firefox/addon/twitch-chat-pronouns/  * * * Select your pronouns: https://pronouns.alejo.io/"
+		},
+		"^!lurk": {
+			"CHAT":		"FeelsBadMan USERNAME is now lurking as a background process FeelsBadMan"
+		},
+		"^!unlurk": {
+			"CHAT":		"FeelsGoodMan USERNAME has returned from lurking and is now running as a foreground process FeelsGoodMan"
+		},
+		"^!hug (\\w+)": {
+			"CHAT":		"USERNAME hugs _1_ <3 <3 <3"
+		},
+		"^!dance": {
+			"CHAT":		"xar2EDM catDance blobDance   Dance  Dance  Dance  Dance  Dance  Dance  Dance  Dance  Dance  catJAM xar2EDM  catJAM Dance  Dance  Dance blobDance catDance xar2EDM"
 		}
+
 	},
 	"COMMENT_FORBIDDEN_PHRASES": [
 		"Forbidden phrases are regular expressions that will cause the user to be banned or timed out, and a message sent to chat",

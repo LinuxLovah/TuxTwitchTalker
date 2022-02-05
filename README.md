@@ -86,11 +86,15 @@ TuxTwitchTalker is released under the [Apache 2.0 licence ](https://www.apache.o
 
 In essence, anyone can use TuxTwitchTalker, but I don't want a company (like Streamlabs) to take it and sell it as a commercial product.  It will ALWAYS be free and open source.
 
-Prerequisites
+Creating An Account For Your Bot
 ---
-Unless you are going to run your bot as your username, which might be confusing to viewers, you may want to create a completely separate Twitch account for your bot to log in as and[register your bot with Twitch](https://dev.twitch.tv/docs/authentication#registration) to get the OAuth token you will need to put in the configuration file.
+While not strictly necessary, it's a good idea to make a separate Twitch account for your bot, so you can control its access, and it's less confusing for your viewers when bot messages come from a separate user.
 
-Installation
+1. Go to https://www.twitch.tv and set up a new separate account.  If you don't want to log out of your current account, open up an incognito window and set up the new account in that.
+2. [Register your bot with Twitch](https://dev.twitch.tv/docs/authentication#registration).  Make sure to record the client_id that it returns.  It will be needed for future releases of TuxTwitchTalker.
+3. The library I use for chat communications, [tmi.js](https://tmijs.com/), requires an oAuth token that you will need to put in your TuxTwitchTalker configuration file.  In a browser logged in as your bot, go to https://twitchapps.com/tmi/ and it will give you an oAuth token.  Make note of it.
+
+Installing TuxTwitchTalker
 ---
 To take full advantage of TuxTwitchTalker's features, it should be installed on your streaming computer.  You can install it on any computer, but some functionality, like playing media over stream, won't be sent to your broadcast.
 
@@ -100,22 +104,26 @@ To take full advantage of TuxTwitchTalker's features, it should be installed on 
 
     > **git clone https://github.com/LinuxLovah/TuxTwitchTalker**
 
-	or [download](https://github.com/LinuxLovah/TuxTwitchTalker/archive/refs/heads/main.zip) and expand the contents into some directory.  If you clone the repository, it makes it much easier to keep it updated.
-3. Run **npm install** in the project directory to install all the NodeJS modules the project depends on.
+	or [download](https://github.com/LinuxLovah/TuxTwitchTalker/archive/refs/heads/main.zip) and expand the contents into some directory.  If you clone the repository, it makes it much easier to keep it updated.  If you download the zip file, unzip it into an empty directory.
+3. Open up a command line shell in the directory you cloned/unzipped TuxTwitchTalker into
+4. Run **npm install** in that shell to install all the NodeJS modules the project depends on.
 
 
-
-Configuration
+Configuring TuxTwitchTalker
 ---
-TuxTwitchTalker is configured using [a JSON file](https://en.wikipedia.org/wiki/JSON), which allows complex expressions and lists to flexibly customize it.  The default configuration file is **config.json**.  You can specify a different filename for the config file as the first parameter to the command
-> node TuxTwitchTalker.js my_other_config_file.json
+TuxTwitchTalker is configured using [a JSON file](https://en.wikipedia.org/wiki/JSON), which allows complex expressions and lists to flexibly customize it.  The default configuration file is **config.json**
 
 There is a sample configuration file called **sample_config.json**.  It's important to note that JSON file doesn't support comments, so the documentation is included as JSON format as lines starting with **"COMMENT"**.
 1. Copy **sample_config.json** to **config.json**
-2. Edit config.json in your favorite text editor.  Do not use Word, or Wordpad, or any other word processing program that will change characters to non-ASCII characters.
-3. TuxTwitchTalker can log in with your personal username, or you can create a new twitch account for the bot to log into.  Add the username to the config file
-4. Generate an OAuth hash at https://twitchapps.com/tmi/ while logged into Twitch as the username the bot will log in as, and add the hash to the config file
-5. Follow the directions in the config file to fill in the rest of the file, like users to respond to, etc.
+2. Edit config.json in your favorite text editor.  Do not use Word, or Wordpad, or any other word processing program that will change characters to non-ASCII characters.  On Windows, Notepad will work.
+3. Follow the directions in the config file to fill in the rest of the file, like users to respond to, etc.  All sections that start with **"COMMENT** are just documentation to help you, and should not be changed.
+
+The most important settings to update before the bot will run are:
+- "BOT_NAME"
+- "TMI_OAUTH"
+- "IGNORE_USERS"
+- "ADMIN_USERS"
+- "CHANNELS"
 
 
 Running TuxTwitchTalker
@@ -132,6 +140,7 @@ Support/Contact
 ---
 * [LinuxLovah@gmail.com](mailto:LinuxLovah@gmail.com)
 * https://twitter.com/LinuxLovahTTV
+* https://twitch.tv/LinuxLovah
 * I offer support [on my Discord server](https://discord.gg/dJeFM2GpZN) in the **#streaming-tech-talk** channel
 
 Donations

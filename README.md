@@ -93,6 +93,7 @@ While not strictly necessary, it's a good idea to make a separate Twitch account
 1. Go to https://www.twitch.tv and set up a new separate account.  If you don't want to log out of your current account, open up an incognito window and set up the new account in that.
 2. [Register your bot with Twitch](https://dev.twitch.tv/docs/authentication#registration).  Make sure to record the client_id that it returns.  It will be needed for future releases of TuxTwitchTalker.
 3. The library I use for chat communications, [tmi.js](https://tmijs.com/), requires an oAuth token that you will need to put in your TuxTwitchTalker configuration file.  In a browser logged in as your bot, go to https://twitchapps.com/tmi/ and it will give you an oAuth token.  Make note of it.
+4. Go into Twitch Roles Manager and give your bot the moderator and editor roles.
 
 Installing TuxTwitchTalker
 ---

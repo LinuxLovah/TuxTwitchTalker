@@ -108,7 +108,7 @@ To take full advantage of TuxTwitchTalker's features, it should be installed on 
 	or [download](https://github.com/LinuxLovah/TuxTwitchTalker/archive/refs/heads/main.zip) and expand the contents into some directory.  If you clone the repository, it makes it much easier to keep it updated.  If you download the zip file, unzip it into an empty directory.
 3. Open up a command line shell in the directory you cloned/unzipped TuxTwitchTalker into
 4. Run **npm install** in that shell to install all the NodeJS modules the project depends on.
-5. If you are running TuxTwitchTalker on your streaming computer and want the ability to play sounds on stream (a big part of the bot's functionality) you will need some sort of media player.  I find that the open source (VLC)[https://www.videolan.org/] works very well for this purpose, is free and runs on almost anything.  The media player is configurable in the config file, but the sample config file already has the right parameters for VLC by default.
+5. If you are running TuxTwitchTalker on your streaming computer and want the ability to play sounds on stream (a big part of the bot's functionality) you will need some sort of media player.  I find that the open source [VLC](https://www.videolan.org/) works very well for this purpose, is free and runs on almost anything.  The media player is configurable in the config file, but the sample config file already has the right parameters for VLC by default.
 
 
 Configuring TuxTwitchTalker

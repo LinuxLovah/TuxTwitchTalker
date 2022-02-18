@@ -116,7 +116,7 @@ function onConnectedHandler(addr, port) {
 
 // Called every time a message comes in.  This is effectively the main chat processing loop.
 function onMessageHandler(target, user, msg) {
-	if (env.IGNORE_USERS.includes(user.username)) {
+	if (env.IGNORE_USERS.includes(user.username.toLowerCase())) {
 		return;
 	}
 
@@ -141,12 +141,15 @@ function onMessageHandler(target, user, msg) {
 
 	// Is it a command triggered by a regular expression in chat
 	runTriggeredCommand(target, user, commandName, args);
+
+	// Is it a GIPHY URL?
+	runImageLink(target, user, commandName, args);
 }
 
 
 
 function runAdminCommand(target, user, commandName, args) {
-	if (env.ADMIN_USERS.includes(user.username)) {
+	if (user && user.username && env.ADMIN_USERS.includes(user.username.toLowerCase())) {
 		if (commandName === '!!clearSeen') {
 			seenUsers = [];
 			console.log(`Seen list is now ${seenUsers}`);
@@ -224,6 +227,24 @@ function runTriggeredCommand(target, user, message, args) {
 	}
 }
 
+function runImageLink(target, user, message, args) {
+	if (isFeatureEnabled("imagelink")) {
+		// TODO Drive this from configuration
+		let imageLinkRegex= new RegExp("^(https://media.giphy.com/media/[a-zA-Z0-9]*/giphy.gif|https://media.giphy.com/media/[a-zA-Z0-9]*/giphy-downsized-large.gif)$");
+		let outputFile="data/giphy_popup.html";
+		if(message.match(imageLinkRegex)) {
+			let contents =`<img src="${message}" width="100%" height="100%">`;
+			fs.writeFile(outputFile, contents, err => {
+				if (err) {
+				  console.error(err)
+				  return
+				}
+				console.log(`Wrote image link ${contents} for ${user.username}`);
+			  });
+		}
+	}
+}
+
 
 function runForbiddenPhrases(target, user, message, args) {
 	// We dont want to take actions against mods and VIPs automatically
@@ -275,8 +296,8 @@ function runFirstSeen(target, user, commandName, args) {
 		console.log("Ignoring error");
 	}
 
-	if (!seenUsers.includes(user.username)) {
-		seenUsers.push(user.username);
+	if (!seenUsers.includes(user.username.toLowerCase())) {
+		seenUsers.push(user.username.toLowerCase());
 		console.log(`New user seen '${user.username}'`);
 		greetUser(target, user, commandName);
 	}
@@ -401,8 +422,8 @@ function greetUser(target, user, commandName) {
 	if ("GREETINGS" in env && isFeatureEnabled("greetings")) {
 		let greeting = "";
 		// Find and format greeting text
-		if (user.username in env.GREETINGS && cCHAT in env.GREETINGS[user.username]) {
-			greeting = env.GREETINGS[user.username][cCHAT];
+		if (user && user.username.toLowerCase() in env.GREETINGS && cCHAT in env.GREETINGS[user.username.toLowerCase()]) {
+			greeting = env.GREETINGS[user.username.toLowerCase()][cCHAT];
 		} else if (user.mod && cDEFAULT_MOD in env.GREETINGS && cCHAT in env.GREETINGS[cDEFAULT_MOD]) {
 			greeting = env.GREETINGS[cDEFAULT_MOD][cCHAT];
 		} else if (user.vip && cDEFAULT_VIP in env.GREETINGS && cCHAT in env.GREETINGS[cDEFAULT_VIP]) {
@@ -414,8 +435,8 @@ function greetUser(target, user, commandName) {
 
 		// Find and play media
 		greeting = "";
-		if (env.GREETINGS[user.username] && env.GREETINGS[user.username][cMEDIA]) {
-			greeting = env.GREETINGS[user.username][cMEDIA];
+		if (env.GREETINGS[user.username.toLowerCase()] && env.GREETINGS[user.username.toLowerCase()][cMEDIA]) {
+			greeting = env.GREETINGS[user.username.toLowerCase()][cMEDIA];
 		} else if (user.mod && env.GREETINGS[cDEFAULT_MOD][cMEDIA]) {
 			greeting = env.GREETINGS[cDEFAULT_MOD][cMEDIA];
 		} else if (user.vip && GREETINGS[cDEFAULT_VIP][cMEDIA]) {
@@ -427,8 +448,8 @@ function greetUser(target, user, commandName) {
 
 		// Shout out the user.  Does not do the shouting out itself but runs your shoutout command.
 		// We want to delay this a bit so it doesn't clash with any media playing
-		if (user.username in env.GREETINGS && cSHOUTOUT in env.GREETINGS[user.username]) {
-			sendShoutOut(target, user, env.GREETINGS[user.username][cSHOUTOUT]);
+		if (user.username.toLowerCase() in env.GREETINGS && cSHOUTOUT in env.GREETINGS[user.username.toLowerCase()]) {
+			sendShoutOut(target, user, env.GREETINGS[user.username.toLowerCase()][cSHOUTOUT]);
 		}
 	}
 }

@@ -7,6 +7,7 @@
 		"then modifying it with your values.  The first few entries, with your identity and the identity the bot should run as are the most important.",
 		"You can specify a different filename as the first parameter on the command line.",
 		"TIPS:",
+		"- All usernames should be specified here in lower case only",
 		"- For 'CHAT', 'MEDIA', and 'SHOUTOUT' entries, multiple values can be specified, and one will be chosen at random.",
 		"  This means a random greeting/sound effect/response will be chosen.  There are several examples of this in this sample file",
 		"- For 'CHAT', 'MEDIA', and 'SHOUTOUT' entries, the string USERNAME in the value will be replaced by the username it's responding to, for personalization.",

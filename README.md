@@ -45,7 +45,7 @@ Features, already implemented
   *  **!!addSeen USERNAME**: Adds USERNAME to the seen list (specify a real username)
   *  **!!testGreeting USERNAME**: Tests the chat and media greetings for USERNAME to verify they are configured right (specify a real username)
   *  **!!exit**: Stops the bot from running.
-  *  **!!reload**
+  *  **!!reload**: Reload the configuration file without restarting the bot. Useful when you make configuration changes mid-stream, like adding a greeting for a user.
 * **User commands** can be run by everyone.  All user commands can be turned on and off in the configuration.
   * **!dice**: Rolls a dice and replies in chat with the number (1-6) rolled.
   * **!timer [MINUTES] [TIMERNAME]**: Start a timer that will wait the specified number of minutes and then alert when the timer is done, with it's name.  The alert can be a message sent to chat and/or playing a mediafile.

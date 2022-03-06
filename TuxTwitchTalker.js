@@ -24,6 +24,8 @@ const url = require('url');
 var seenUsers = [];
 var browserSourceAlertContent = "";
 var counters = {};
+var env = {};
+var configFile = "";
 
 //--------------------- Constants
 const cBAN				= "BAN";
@@ -43,7 +45,7 @@ const cUSERNAME			= "USERNAME";
 //--------------------- Config
 // First parameter is the config file to load
 // Default is "./config.json"
-var configFile = process.argv[2];
+configFile = process.argv[2];
 if(! configFile || configFile.length === 0) {
 	configFile = "./config.json";
 }
@@ -54,8 +56,7 @@ if (! configFile || configFile.length === 0) {
 	console.log(`Config file '${configFile}' does not exist.  Exiting.`);
 	process.exit(1);
 }
-const env = require(configFile);
-console.log(`config file '${configFile}'`);
+loadConfigFile();
 const channel = env.CHANNELS[0];
 
 //--------------------- Connect and register handlers
@@ -97,8 +98,6 @@ for(const periodicMessage in env.PERIODIC_MESSAGES) {
 			playMedia(channel, "", env.PERIODIC_MESSAGES[periodicMessage][cMEDIA]);
 		}
 	  },env.PERIODIC_MESSAGES[periodicMessage]["INTERVAL"] * 60000); // milliseconds = minutes * 60 * 1000
-
-
 }
 
 //--------------------- Browser Source web server
@@ -116,7 +115,7 @@ function onConnectedHandler(addr, port) {
 
 // Called every time a message comes in.  This is effectively the main chat processing loop.
 function onMessageHandler(target, user, msg) {
-	if (env.IGNORE_USERS.includes(user.username.toLowerCase())) {
+	if (env.IGNORE_USERS && env.IGNORE_USERS.includes(user.username.toLowerCase())) {
 		return;
 	}
 
@@ -130,7 +129,7 @@ function onMessageHandler(target, user, msg) {
 
 	// If the command is known, let's execute it
 	// Admin commands begin with !!
-	if (commandName.slice(0, 2) === "!!") {
+	if (commandName.startsWith("!!") ) {
 		runAdminCommand(target, user, commandName, args);
 	} else if (commandName.slice(0, 1) === "!") {
 		runUserCommand(target, user, commandName, args);
@@ -139,8 +138,11 @@ function onMessageHandler(target, user, msg) {
 	// Does the post contain forbidden phrases?
 	runForbiddenPhrases(target, user, commandName, args);
 
-	// Is it a command triggered by a regular expression in chat
-	runTriggeredCommand(target, user, commandName, args);
+	// Is it a message triggered by a regular expression in chat
+	runTriggeredMessage(target, user, commandName, args);
+
+	// Is this a command to return a random line from a a file defined in RANDOM_FILE_LINE_COMMANDS?
+	runRandomFileLineCommands(target, user, commandName);
 
 	// Is it a GIPHY URL?
 	runImageLink(target, user, commandName, args);
@@ -155,6 +157,8 @@ function runAdminCommand(target, user, commandName, args) {
 			console.log(`Seen list is now ${seenUsers}`);
 		} else if (commandName === '!!exit') {
 			console.log(`Exiting due to !!exit command`);
+		} else if (commandName === "!!reload") {
+			loadConfigFile();
 		} else if (commandName.startsWith("!!delSeen ")) {
 			user = commandName.split(" ")[1];
 			for( var i = 0; i < seenUsers.length; i++){
@@ -177,8 +181,6 @@ function runAdminCommand(target, user, commandName, args) {
 			enableFeature("greetings");
 		} else if (commandName === "!!greetingsOff") {
 			disableFeature("greetings");
-		} else {
-			console.log(`Unknown admin command ${commandName}`);
 		}
 	} else {
 		console.log(`Ignoring admin command '${commandName}' from '${user.username}'`);
@@ -200,17 +202,20 @@ function runUserCommand(target, user, commandName, args) {
 	} else if(commandName.startsWith("!?") && isFeatureEnabled("counter")) {
 		counterGet(target, user, commandName, args);
 	}
-
-	// Is this a command to return a random line from a a file defined in RANDOM_FILE_LINE_COMMANDS?
-	runRandomFileLineCommands(target, user, commandName);
 }
 
-function runTriggeredCommand(target, user, message, args) {
+function runTriggeredMessage(target, user, message, args) {
 	for(const trigger in env.TRIGGERED_MESSAGES) {
+		// Triggered commands that start with !! are for admin users.
+		if (message.startsWith("!!") && user && user.username && ! env.ADMIN_USERS.includes(user.username.toLowerCase())) {
+			console.log(`User ${user.username} is not an admin and cannot run the triggered command ${message}`);
+			return
+		}
+
 		const regex = new RegExp(trigger);
 		const matches = message.match(regex);
 		if(matches) {
-			console.log(`Found message matching ${regex}`);
+			console.log(`Found triggered message matching ${regex}`);
 			if(cCHAT in env.TRIGGERED_MESSAGES[trigger]) {
 				let reply = env.TRIGGERED_MESSAGES[trigger][cCHAT];
 				sendChat(target, user, reply, matches);
@@ -313,7 +318,7 @@ function runRollDice(target, user, commandName) {
 // Some commands are to read a random line from a file.
 // These commands will be defined in the RANDOM_FILE_LINE_COMMANDS array in the config file
 function runRandomFileLineCommands(target, user, commandName) {
-	if (commandName in env.RANDOM_FILE_LINE_COMMANDS) {
+	if (env.RANDOM_FILE_LINE_COMMANDS && commandName in env.RANDOM_FILE_LINE_COMMANDS) {
 		var fileName = env.RANDOM_FILE_LINE_COMMANDS[commandName];
 		client.say(target, readRandomLine(fileName));
 	}
@@ -322,6 +327,10 @@ function runRandomFileLineCommands(target, user, commandName) {
 // Start a timer with the !timer command.  When the time is up,
 // the CHAT entry will be sent to chat and/or MEDIA entry played
 function runTimer(target, user, commandName, args) {
+	if(! isFeatureEnabled("timer")) {
+		return;
+	}
+
 	let timerName = "";
 	if( (!args[2]) || isNaN(args[2]) ) {
 		client.say(target, "Missing or invalid timer length in minutes");
@@ -565,4 +574,11 @@ function enableFeature(command) {
 
 function disableFeature(command) {
 	env.COMMANDS_FEATURE_FLAGS[command] = "false";
+}
+
+// Load or reload the config file
+function loadConfigFile() {
+	delete require.cache[require.resolve(configFile)];
+	env = require(configFile);
+	console.log(`config file '${configFile}' loaded ${env.ADMIN_USERS}`);
 }

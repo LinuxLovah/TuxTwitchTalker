@@ -30,6 +30,7 @@ Features, already implemented
    *  The trigger can be a [regular expression](https://www.oreilly.com/content/an-introduction-to-regular-expressions/)
    * messages can have the sender's username inserted in the message.
    * Multiple messages can be specified in an array, and one will be picked at random
+   * Any triggered message starting with **!!** can only be used by administrators
 *  **Forbidden phrases**: When a specific word or phrase is mentioned, the user can be just warned, they can be timed out for a specified number of seconds, or they can be banned.
    *  The trigger can be a [regular expression](https://www.oreilly.com/content/an-introduction-to-regular-expressions/)
    * messages can have the sender's username inserted in the message.
@@ -43,6 +44,7 @@ Features, already implemented
   *  **!!addSeen USERNAME**: Adds USERNAME to the seen list (specify a real username)
   *  **!!testGreeting USERNAME**: Tests the chat and media greetings for USERNAME to verify they are configured right (specify a real username)
   *  **!!exit**: Stops the bot from running.
+  *  **!!reload**
 * **User commands** can be run by everyone.  All user commands can be turned on and off in the configuration.
   * **!dice**: Rolls a dice and replies in chat with the number (1-6) rolled.
   * **!timer [MINUTES] [TIMERNAME]**: Start a timer that will wait the specified number of minutes and then alert when the timer is done, with it's name.  The alert can be a message sent to chat and/or playing a mediafile.

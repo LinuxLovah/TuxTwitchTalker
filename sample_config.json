@@ -50,11 +50,13 @@
 		"If the value is 'true', then that command will be enabled, otherwise it will be disabled."
 	],
 	"COMMANDS_FEATURE_FLAGS": {
-		"dice": 		"true",
-		"timer":		"true",
-		"counter":		"true",
-		"webserver":	"true",
-		"greetings":	"true"
+		"dice": 			"true",
+		"timer":			"true",
+		"counter":			"true",
+		"webserver":		"false",
+		"greetings":		"true",
+		"imagelink":		"true",
+		"forbiddenForModsVIPs": "true"
 	},
 	"COMMENT_GREETINGS": [
 		"This is a list of regulars in your channel, and how you would like them",
@@ -138,7 +140,8 @@
 		"If you want to make sure the word or phrase is used at the beginning of a line, like a !command, put a caret (^) before it",
 		"Advanced: If you use capture groups in the regex, you can insert those matches in the chat string",
 		"by putting in _1_ for the first parameter, _2_ for the second parameter, etc.  This allows complex",
-		"responses using the line from chat, like thanking subscribers"
+		"responses using the line from chat, like thanking subscribers",
+		"Any word or phrase starting with !! can only be run by administrators"
 	],
 	"TRIGGERED_MESSAGES": {
 		"cat": {

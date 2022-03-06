@@ -21,7 +21,7 @@ Features, already implemented
   * Individual regular viewers can have a special greeting/media play for them
   * Mods can have a separate greeting/media play for them
   * VIPs can have a separate greeting/media play for them
-  * First time chatters in the stream (ever) can have a separate greeting/media play for them.  The streamers already seen are stored in a file, so the list persists runs of the program.
+  * First time chatters in the stream (ever) can have a separate greeting/media play for them.  The streamers already seen are stored in the file **data/all_chatters.txt**, so the list persists runs of the program.  You can pre-populate that file with lower case usernames if you wish, but there's no need to add anyone who is already handled by one of the other greeting options (personal/mod/vip/etc).
   * Other streamers can automatically be shouted out (executes the shoutout command, does not shout them out directly)
   * There can also be a default greeting/media for those without specific greetings.
   * Greetings can have the new viewer's username inserted in the message.
@@ -77,7 +77,7 @@ Features, long term
 * A way to alert with video in addition to media and chat messages
 * A way to replace Streamlabs Labels to update files with latest follower, latest sub, etc.
 * Multi-tenant redesign so that one instance of TuxTwitchTalker can respond to the chat for multiple streamers, each with their separate configuration.
-* Browser source to push visual content to broadcasting software
+* Browser source (web server) to push visual content to broadcasting software: Right now the Proof Of Concept web server exists in the code, turned off in the feature flags by default.  I don't want to remove that code because I expect to continue that work soon.
 
 My goal is to get most of these features implemented by the end of 2021.
 

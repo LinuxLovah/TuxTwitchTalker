@@ -612,6 +612,20 @@ function disableFeature(command) {
 // Load or reload the config file
 function loadConfigFile() {
 	delete require.cache[require.resolve(configFile)];
-	env = require(configFile);
-	console.log(`config file '${configFile}' loaded ${env.ADMIN_USERS}`);
+	try {
+		let envNew = require(configFile);
+		console.log(`config file '${configFile}' loaded`);
+		if (envNew && Object.keys(envNew).length > 0) {
+			env = envNew;
+		}
+	} catch (err) {
+		console.log(`Error loading configuration file: ${err}`);
+
+		// If this is the first load, then exit.  Otherwise warn in chat and just don't update env
+		if(channel && client) {
+			client.say(channel, `Could not load configuration file, continuing with existing configuration.`);
+		} else {
+			exit(1);
+		}
+	}
 }

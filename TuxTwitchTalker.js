@@ -175,10 +175,12 @@ function runAdminCommand(target, user, commandName, args) {
 			console.log(`Seen list is now ${seenUsers}`);
 		} else if (commandName.startsWith("!!testGreeting ")) {
 			let username = commandName.split(" ")[1];
-			user = {
+			// If the user typed @ to look up the name we want to remove it
+			username = username.replace("@","");
+			let testUser = {
 				"username": username
 			}
-			greetUser(target, user, commandName);
+			greetUser(target, testUser, commandName);
 		} else if (commandName === "!!greetingsOn") {
 			enableFeature("greetings");
 		} else if (commandName === "!!greetingsOff") {

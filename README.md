@@ -21,6 +21,7 @@ Features, already implemented
   * Individual regular viewers can have a special greeting/media play for them
   * Mods can have a separate greeting/media play for them
   * VIPs can have a separate greeting/media play for them
+  * First time chatters in the stream (ever) can have a separate greeting/media play for them.  The streamers already seen are stored in a file, so the list persists runs of the program.
   * Other streamers can automatically be shouted out (executes the shoutout command, does not shout them out directly)
   * There can also be a default greeting/media for those without specific greetings.
   * Greetings can have the new viewer's username inserted in the message.

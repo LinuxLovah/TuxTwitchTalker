@@ -26,6 +26,7 @@ var browserSourceAlertContent = "";
 var counters = {};
 var env = {};
 var configFile = "";
+var allChattersFile = "data/all_chatters.txt";
 
 //--------------------- Constants
 const cBAN				= "BAN";
@@ -34,6 +35,7 @@ const cDEFAULT 			= "default";
 const cDEFAULT_MOD 		= "default_mod";
 const cDEFAULT_VIP 		= "default_vip";
 const cFEATURE_FLAGS	= "COMMANDS_FEATURE_FLAGS";
+const cFIRST_TIME_CHATTER	= "first_time_chatter";
 const cMEDIA 			= "MEDIA";
 const cMEDIAFILE		= "MEDIAFILE";
 const cSHOUTOUT 		= "SHOUTOUT";
@@ -430,6 +432,10 @@ function onWebRequest(request, response) {
 function greetUser(target, user, commandName) {
 	if ("GREETINGS" in env && isFeatureEnabled("greetings")) {
 		let greeting = "";
+
+		// Look it up once here or we will get a different answer for the second call
+		let firstTimeChatter = isFirstTimeChatter(user.username.toLowerCase());
+
 		// Find and format greeting text
 		if (user && user.username.toLowerCase() in env.GREETINGS && cCHAT in env.GREETINGS[user.username.toLowerCase()]) {
 			greeting = env.GREETINGS[user.username.toLowerCase()][cCHAT];
@@ -437,6 +443,8 @@ function greetUser(target, user, commandName) {
 			greeting = env.GREETINGS[cDEFAULT_MOD][cCHAT];
 		} else if (user.vip && cDEFAULT_VIP in env.GREETINGS && cCHAT in env.GREETINGS[cDEFAULT_VIP]) {
 			greeting = env.GREETINGS[cDEFAULT_VIP][cCHAT];
+		} else if (firstTimeChatter && cFIRST_TIME_CHATTER in env.GREETINGS && cCHAT in env.GREETINGS[cFIRST_TIME_CHATTER]) {
+			greeting = env.GREETINGS[cFIRST_TIME_CHATTER][cCHAT];
 		} else if (cCHAT in env.GREETINGS[cDEFAULT]) {
 			greeting = env.GREETINGS[cDEFAULT][cCHAT];
 		}
@@ -450,6 +458,8 @@ function greetUser(target, user, commandName) {
 			greeting = env.GREETINGS[cDEFAULT_MOD][cMEDIA];
 		} else if (user.vip && GREETINGS[cDEFAULT_VIP][cMEDIA]) {
 			greeting = env.GREETINGS[cDEFAULT_VIP][cMEDIA];
+		} else if (firstTimeChatter && cFIRST_TIME_CHATTER in env.GREETINGS && cMEDIA in env.GREETINGS[cFIRST_TIME_CHATTER]) {
+			greeting = env.GREETINGS[cFIRST_TIME_CHATTER][cMEDIA];
 		} else if (env.GREETINGS[cDEFAULT][cMEDIA]) {
 			greeting = env.GREETINGS[cDEFAULT][cMEDIA];
 		}
@@ -545,6 +555,29 @@ function playMedia(target, user, media, replacements) {
 }
 
 
+// Is the user a first time ever chatter? Check/update file
+function isFirstTimeChatter(username) {
+	try {
+		// We need to lowercase names for comparison
+		username = username.toLowerCase();
+		// Initialze allChatters here to simplify the logic if the file doesn't exist
+		let allChatters="";
+
+		if(fs.existsSync(allChattersFile)) {
+			// read contents of the allChatters file
+			allChatters = fs.readFileSync(allChattersFile, 'UTF-8');
+			if (allChatters.includes(username)) {
+				return false;
+			}
+		}
+		// If we're here, then either the file doesn't exist, or doesn't contain the user.  Add them.
+		fs.appendFileSync(allChattersFile, `${username}\n`);
+		return true;
+
+	} catch (err) {
+		console.error(err);
+	}
+}
 
 // Return a random line from a file
 function readRandomLine(fileName) {

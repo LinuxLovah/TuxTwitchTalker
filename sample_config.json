@@ -95,6 +95,10 @@
 			"CHAT":			"Welcome to the chat, USERNAME! VIP IN DA HOUSE! Give them some space! BibleThump BibleThump BibleThump ",
 			"MEDIA":		"../sounds/hello_doubtfire.mp3"
 		},
+		"first_time_chatter": {
+			"CHAT":			"Welcome to the chat, USERNAME! Thank you for checking out my stream!",
+			"MEDIA":		"../sounds/be_our_guest.mp3"
+		},
 		"default": {
 			"CHAT":			["Welcome to the chat, USERNAME!", "USERNAME is here!"],
 			"MEDIA":		["../sounds/hello_doubtfire.mp3", "../sounds/greetings.mp3"]

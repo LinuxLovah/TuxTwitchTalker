@@ -306,6 +306,9 @@ function runFirstSeen(target, user, commandName, args) {
 	if (!seenUsers.includes(user.username.toLowerCase())) {
 		seenUsers.push(user.username.toLowerCase());
 		console.log(`New user seen '${user.username}'`);
+
+		// Look it up once here or we will get a different answer for the second call
+		user.firstTimeChatter = isFirstTimeChatter(user.username);
 		greetUser(target, user, commandName);
 	}
 }
@@ -433,9 +436,6 @@ function greetUser(target, user, commandName) {
 	if ("GREETINGS" in env && isFeatureEnabled("greetings")) {
 		let greeting = "";
 
-		// Look it up once here or we will get a different answer for the second call
-		let firstTimeChatter = isFirstTimeChatter(user.username.toLowerCase());
-
 		// Find and format greeting text
 		if (user && user.username.toLowerCase() in env.GREETINGS && cCHAT in env.GREETINGS[user.username.toLowerCase()]) {
 			greeting = env.GREETINGS[user.username.toLowerCase()][cCHAT];
@@ -443,7 +443,7 @@ function greetUser(target, user, commandName) {
 			greeting = env.GREETINGS[cDEFAULT_MOD][cCHAT];
 		} else if (user.vip && cDEFAULT_VIP in env.GREETINGS && cCHAT in env.GREETINGS[cDEFAULT_VIP]) {
 			greeting = env.GREETINGS[cDEFAULT_VIP][cCHAT];
-		} else if (firstTimeChatter && cFIRST_TIME_CHATTER in env.GREETINGS && cCHAT in env.GREETINGS[cFIRST_TIME_CHATTER]) {
+		} else if (user.firstTimeChatter && cFIRST_TIME_CHATTER in env.GREETINGS && cCHAT in env.GREETINGS[cFIRST_TIME_CHATTER]) {
 			greeting = env.GREETINGS[cFIRST_TIME_CHATTER][cCHAT];
 		} else if (cCHAT in env.GREETINGS[cDEFAULT]) {
 			greeting = env.GREETINGS[cDEFAULT][cCHAT];
@@ -458,7 +458,7 @@ function greetUser(target, user, commandName) {
 			greeting = env.GREETINGS[cDEFAULT_MOD][cMEDIA];
 		} else if (user.vip && GREETINGS[cDEFAULT_VIP][cMEDIA]) {
 			greeting = env.GREETINGS[cDEFAULT_VIP][cMEDIA];
-		} else if (firstTimeChatter && cFIRST_TIME_CHATTER in env.GREETINGS && cMEDIA in env.GREETINGS[cFIRST_TIME_CHATTER]) {
+		} else if (user.firstTimeChatter && cFIRST_TIME_CHATTER in env.GREETINGS && cMEDIA in env.GREETINGS[cFIRST_TIME_CHATTER]) {
 			greeting = env.GREETINGS[cFIRST_TIME_CHATTER][cMEDIA];
 		} else if (env.GREETINGS[cDEFAULT][cMEDIA]) {
 			greeting = env.GREETINGS[cDEFAULT][cMEDIA];

@@ -21,40 +21,41 @@ const http = require('http');
 const url = require('url');
 
 //--------------------- Global variables
-var seenUsers = [];
+var allChattersFile = "data/all_chatters.txt";
 var browserSourceAlertContent = "";
+var configFile = "";
 var counters = {};
 var env = {};
-var configFile = "";
-var allChattersFile = "data/all_chatters.txt";
+var periodicMessageTimers = [];
+var seenUsers = [];
 
 //--------------------- Constants
-const cBAN				= "BAN";
-const cCHAT 			= "CHAT";
-const cDEFAULT 			= "default";
-const cDEFAULT_MOD 		= "default_mod";
-const cDEFAULT_VIP 		= "default_vip";
-const cFEATURE_FLAGS	= "COMMANDS_FEATURE_FLAGS";
-const cFIRST_TIME_CHATTER	= "first_time_chatter";
-const cMEDIA 			= "MEDIA";
-const cMEDIAFILE		= "MEDIAFILE";
-const cSHOUTOUT 		= "SHOUTOUT";
-const cTIMER_ALERT 		= "TIMER_ALERT";
-const cTIMERNAME 		= "TIMERNAME";
-const cTIMEOUT			= "TIMEOUT";
-const cUSERNAME			= "USERNAME";
+const cBAN = "BAN";
+const cCHAT = "CHAT";
+const cDEFAULT = "default";
+const cDEFAULT_MOD = "default_mod";
+const cDEFAULT_VIP = "default_vip";
+const cFEATURE_FLAGS = "COMMANDS_FEATURE_FLAGS";
+const cFIRST_TIME_CHATTER = "first_time_chatter";
+const cMEDIA = "MEDIA";
+const cMEDIAFILE = "MEDIAFILE";
+const cSHOUTOUT = "SHOUTOUT";
+const cTIMER_ALERT = "TIMER_ALERT";
+const cTIMERNAME = "TIMERNAME";
+const cTIMEOUT = "TIMEOUT";
+const cUSERNAME = "USERNAME";
 
 //--------------------- Config
 // First parameter is the config file to load
 // Default is "./config.json"
 configFile = process.argv[2];
-if(! configFile || configFile.length === 0) {
+if (!configFile || configFile.length === 0) {
 	configFile = "./config.json";
 }
-if (! configFile || configFile.length === 0) {
+if (!configFile || configFile.length === 0) {
 	console.log(`No config file specified. Exiting.`);
 	process.exit(1);
-} else if(! fs.existsSync(configFile)) {
+} else if (!fs.existsSync(configFile)) {
 	console.log(`Config file '${configFile}' does not exist.  Exiting.`);
 	process.exit(1);
 }
@@ -80,30 +81,17 @@ client.on('message', onMessageHandler);
 client.connect();
 
 // If the bot dies, say so in chat
-process.on('uncaughtException', function(err) {
-		console.log("*** ERROR: UNHANDLED EXCEPTION ***");
-		console.log(err);
-		client.say(env.CHANNELS, `${env.BOT_NAME} technical difficulties, please check logs!`);
-	}
+process.on('uncaughtException', function (err) {
+	console.log("*** ERROR: UNHANDLED EXCEPTION ***");
+	console.log(err);
+	client.say(env.CHANNELS, `${env.BOT_NAME} technical difficulties, please check logs!`);
+}
 );
 
-//--------------------- Periodic messages
-for(const periodicMessage in env.PERIODIC_MESSAGES) {
-	console.log(`Loading periodic message '${periodicMessage}'`);
 
-	setInterval(()=> {
-		console.log(`Posting periodic message ${periodicMessage} every ${env.PERIODIC_MESSAGES[periodicMessage]["INTERVAL"]} minute`);
-		if(cCHAT in env.PERIODIC_MESSAGES[periodicMessage]) {
-			sendChat(channel, "", env.PERIODIC_MESSAGES[periodicMessage][cCHAT]);
-		}
-		if(cMEDIA in env.PERIODIC_MESSAGES[periodicMessage]) {
-			playMedia(channel, "", env.PERIODIC_MESSAGES[periodicMessage][cMEDIA]);
-		}
-	  },env.PERIODIC_MESSAGES[periodicMessage]["INTERVAL"] * 60000); // milliseconds = minutes * 60 * 1000
-}
 
 //--------------------- Browser Source web server
-if(isFeatureEnabled("webserver")) {
+if (isFeatureEnabled("webserver")) {
 	http.createServer(onWebRequest).listen(8888);
 	console.log('Web server has started listing on 8888');
 }
@@ -131,7 +119,7 @@ function onMessageHandler(target, user, msg) {
 
 	// If the command is known, let's execute it
 	// Admin commands begin with !!
-	if (commandName.startsWith("!!") ) {
+	if (commandName.startsWith("!!")) {
 		runAdminCommand(target, user, commandName, args);
 	} else if (commandName.slice(0, 1) === "!") {
 		runUserCommand(target, user, commandName, args);
@@ -163,8 +151,8 @@ function runAdminCommand(target, user, commandName, args) {
 			loadConfigFile();
 		} else if (commandName.startsWith("!!delSeen ")) {
 			user = commandName.split(" ")[1];
-			for( var i = 0; i < seenUsers.length; i++){
-				if ( seenUsers[i] === user) {
+			for (var i = 0; i < seenUsers.length; i++) {
+				if (seenUsers[i] === user) {
 					seenUsers.splice(i, 1);
 				}
 			}
@@ -176,7 +164,7 @@ function runAdminCommand(target, user, commandName, args) {
 		} else if (commandName.startsWith("!!testGreeting ")) {
 			let username = commandName.split(" ")[1];
 			// If the user typed @ to look up the name we want to remove it
-			username = username.replace("@","");
+			username = username.replace("@", "");
 			let testUser = {
 				"username": username
 			}
@@ -195,40 +183,40 @@ function runAdminCommand(target, user, commandName, args) {
 function runUserCommand(target, user, commandName, args) {
 	if (commandName === '!dice' && isFeatureEnabled("dice")) {
 		runRollDice(target, user, commandName);
-	} else if(commandName.startsWith("!timer ")) {
+	} else if (commandName.startsWith("!timer ")) {
 		runTimer(target, user, commandName, args);
-	} else if(commandName.startsWith("!+") && isFeatureEnabled("counter")) {
+	} else if (commandName.startsWith("!+") && isFeatureEnabled("counter")) {
 		counterInc(target, user, commandName, args);
-	} else if(commandName.startsWith("!-") && isFeatureEnabled("counter")) {
+	} else if (commandName.startsWith("!-") && isFeatureEnabled("counter")) {
 		counterDec(target, user, commandName, args);
-	} else if(commandName.startsWith("!=") && isFeatureEnabled("counter")) {
+	} else if (commandName.startsWith("!=") && isFeatureEnabled("counter")) {
 		counterSet(target, user, commandName, args);
-	} else if(commandName.startsWith("!?") && isFeatureEnabled("counter")) {
+	} else if (commandName.startsWith("!?") && isFeatureEnabled("counter")) {
 		counterGet(target, user, commandName, args);
 	}
 }
 
 function runTriggeredMessage(target, user, message, args) {
-	for(const trigger in env.TRIGGERED_MESSAGES) {
+	for (const trigger in env.TRIGGERED_MESSAGES) {
 		// Triggered commands that start with !! are for admin users.
-		if (message.startsWith("!!") && user && user.username && ! env.ADMIN_USERS.includes(user.username.toLowerCase())) {
+		if (message.startsWith("!!") && user && user.username && !env.ADMIN_USERS.includes(user.username.toLowerCase())) {
 			console.log(`User ${user.username} is not an admin and cannot run the triggered command ${message}`);
 			return
 		}
 
 		const regex = new RegExp(trigger);
 		const matches = message.match(regex);
-		if(matches) {
+		if (matches) {
 			console.log(`Found triggered message matching ${regex}`);
-			if(cCHAT in env.TRIGGERED_MESSAGES[trigger]) {
+			if (cCHAT in env.TRIGGERED_MESSAGES[trigger]) {
 				let reply = env.TRIGGERED_MESSAGES[trigger][cCHAT];
 				sendChat(target, user, reply, matches);
 			}
-			if(cMEDIA in env.TRIGGERED_MESSAGES[trigger]) {
+			if (cMEDIA in env.TRIGGERED_MESSAGES[trigger]) {
 				let mediaFile = env.TRIGGERED_MESSAGES[trigger][cMEDIA];
 				playMedia(target, user, mediaFile);
 			}
-			if(cSHOUTOUT in env.TRIGGERED_MESSAGES[trigger]) {
+			if (cSHOUTOUT in env.TRIGGERED_MESSAGES[trigger]) {
 				let shoutOutCommand = env.TRIGGERED_MESSAGES[trigger][cSHOUTOUT];
 				sendShoutOut(target, user, shoutOutCommand, matches);
 			}
@@ -239,17 +227,17 @@ function runTriggeredMessage(target, user, message, args) {
 function runImageLink(target, user, message, args) {
 	if (isFeatureEnabled("imagelink")) {
 		// TODO Drive this from configuration
-		let imageLinkRegex= new RegExp("^(https://media.giphy.com/media/[a-zA-Z0-9]*/giphy.gif|https://media.giphy.com/media/[a-zA-Z0-9]*/giphy-downsized-large.gif)$");
-		let outputFile="data/giphy_popup.html";
-		if(message.match(imageLinkRegex)) {
-			let contents =`<img src="${message}" width="100%" height="100%">`;
+		let imageLinkRegex = new RegExp("^(https://media.giphy.com/media/[a-zA-Z0-9]*/giphy.gif|https://media.giphy.com/media/[a-zA-Z0-9]*/giphy-downsized-large.gif)$");
+		let outputFile = "data/giphy_popup.html";
+		if (message.match(imageLinkRegex)) {
+			let contents = `<img src="${message}" width="100%" height="100%">`;
 			fs.writeFile(outputFile, contents, err => {
 				if (err) {
-				  console.error(err)
-				  return
+					console.error(err)
+					return
 				}
 				console.log(`Wrote image link ${contents} for ${user.username}`);
-			  });
+			});
 		}
 	}
 }
@@ -259,28 +247,28 @@ function runForbiddenPhrases(target, user, message, args) {
 	// We dont want to take actions against mods and VIPs automatically
 	// However, if the feature flag forbiddenForModsVIPs is true then we will
 	// We never want to trigger for the broadcaster though
-	if( (! isFeatureEnabled("forbiddenForModsVIPs")) && (user.mod || user.vip) ) {
+	if ((!isFeatureEnabled("forbiddenForModsVIPs")) && (user.mod || user.vip)) {
 		return;
 	}
-	if("badges" in user && user.badges && "broadcaster" in user.badges) {
+	if ("badges" in user && user.badges && "broadcaster" in user.badges) {
 		return;
 	}
 
-	for(const trigger in env.FORBIDDEN_PHRASES) {
+	for (const trigger in env.FORBIDDEN_PHRASES) {
 		const regex = new RegExp(trigger);
 		const matches = message.match(regex);
-		if(matches) {
+		if (matches) {
 			console.log(`Found forbidden message matching ${regex}`);
-			if(cCHAT in env.FORBIDDEN_PHRASES[trigger]) {
+			if (cCHAT in env.FORBIDDEN_PHRASES[trigger]) {
 				let reply = env.FORBIDDEN_PHRASES[trigger][cCHAT];
 				sendChat(target, user, reply, matches);
 			}
-			if(cTIMEOUT in env.FORBIDDEN_PHRASES[trigger]) {
+			if (cTIMEOUT in env.FORBIDDEN_PHRASES[trigger]) {
 				let timeoutSeconds = env.FORBIDDEN_PHRASES[trigger][cTIMEOUT];
 				console.log(`Timing out user ${user.username}`);
 				sendChat(target, user, `/timeout ${user.username} ${timeoutSeconds}`, matches);
 			}
-			if(cBAN in env.FORBIDDEN_PHRASES[trigger]) {
+			if (cBAN in env.FORBIDDEN_PHRASES[trigger]) {
 				sendChat(target, user, `/ban ${user.username}`, matches);
 			}
 		}
@@ -297,7 +285,7 @@ function runFirstSeen(target, user, commandName, args) {
 		if ("badges" in user && user.badges && "broadcaster" in user.badges) {
 			return;
 		}
-	} catch(err) {
+	} catch (err) {
 		console.log("Caught error checking for broadcaster:");
 		console.log(err);
 		console.log("user object:");
@@ -334,27 +322,27 @@ function runRandomFileLineCommands(target, user, commandName) {
 // Start a timer with the !timer command.  When the time is up,
 // the CHAT entry will be sent to chat and/or MEDIA entry played
 function runTimer(target, user, commandName, args) {
-	if(! isFeatureEnabled("timer")) {
+	if (!isFeatureEnabled("timer")) {
 		return;
 	}
 
 	let timerName = "";
-	if( (!args[2]) || isNaN(args[2]) ) {
+	if ((!args[2]) || isNaN(args[2])) {
 		client.say(target, "Missing or invalid timer length in minutes");
 		return;
 	}
-	let timeout=Number(args[2]) * 60000;
+	let timeout = Number(args[2]) * 60000;
 
-	if(args[4]) {
+	if (args[4]) {
 		timerName = args.slice(4).join("");
 	}
 	client.say(target, `Starting timer '${timerName}' for ${timeout}ms`);
-	setTimeout( ()=> {
-		if(cTIMER_ALERT in env) {
-			if(cCHAT in env[cTIMER_ALERT]){
+	setTimeout(() => {
+		if (cTIMER_ALERT in env) {
+			if (cCHAT in env[cTIMER_ALERT]) {
 				sendChat(target, user, env[cTIMER_ALERT][cCHAT].replace(cTIMERNAME, timerName));
 			}
-			if(cMEDIA in env[cTIMER_ALERT]) {
+			if (cMEDIA in env[cTIMER_ALERT]) {
 				playMedia(target, user, env[cTIMER_ALERT][cMEDIA].replace(cTIMERNAME, timerName));
 			}
 		}
@@ -366,10 +354,10 @@ function runTimer(target, user, commandName, args) {
 function counterInc(target, user, commandName, args) {
 	let counterName = args[0].substring(2);
 	let offset = Number(args[2]);
-	if(isNaN(Number(offset))) {
+	if (isNaN(Number(offset))) {
 		offset = 1;
 	}
-	if(counterName in counters) {
+	if (counterName in counters) {
 		counters[counterName] += offset;
 	} else {
 		counters[counterName] = 1;
@@ -380,10 +368,10 @@ function counterInc(target, user, commandName, args) {
 function counterDec(target, user, commandName, args) {
 	let counterName = args[0].substring(2);
 	let offset = Number(args[2]);
-	if(isNaN(Number(offset))) {
+	if (isNaN(Number(offset))) {
 		offset = 1;
 	}
-	if(counterName in counters && (counters[counterName] - offset > 0)) {
+	if (counterName in counters && (counters[counterName] - offset > 0)) {
 		counters[counterName] -= offset;
 	} else {
 		counters[counterName] = 0;
@@ -394,7 +382,7 @@ function counterDec(target, user, commandName, args) {
 function counterSet(target, user, commandName, args) {
 	let counterName = args[0].substring(2);
 	let count = Number(args[2]);
-	if(! isNaN(Number(count))) {
+	if (!isNaN(Number(count))) {
 		counters[counterName] = count;
 	}
 	counterGet(target, user, commandName, args);
@@ -402,10 +390,36 @@ function counterSet(target, user, commandName, args) {
 
 function counterGet(target, user, commandName, args) {
 	let counterName = args[0].substring(2);
-	if(counterName in counters) {
+	if (counterName in counters) {
 		client.say(target, `Counter ${counterName} is currently ${counters[counterName]}`);
 	} else {
 		client.say(target, `Counter ${counterName} does not exist`);
+	}
+}
+
+function runPeriodicMessages() {
+	// Unload any existing periodic messages
+	for (const timer of periodicMessageTimers) {
+		clearInterval(timer);
+	}
+	periodicMessageTimers = [];
+
+
+	// Load periodic messages
+	for (const periodicMessage in env.PERIODIC_MESSAGES) {
+
+		console.log(`Loading periodic message '${periodicMessage}' to run every ${env.PERIODIC_MESSAGES[periodicMessage]["INTERVAL"]} minutes`);
+
+		let timer = setInterval(() => {
+			console.log(`Posting periodic message ${periodicMessage} every ${env.PERIODIC_MESSAGES[periodicMessage]["INTERVAL"]} minute`);
+			if (cCHAT in env.PERIODIC_MESSAGES[periodicMessage]) {
+				sendChat(channel, "", env.PERIODIC_MESSAGES[periodicMessage][cCHAT]);
+			}
+			if (cMEDIA in env.PERIODIC_MESSAGES[periodicMessage]) {
+				playMedia(channel, "", env.PERIODIC_MESSAGES[periodicMessage][cMEDIA]);
+			}
+		}, env.PERIODIC_MESSAGES[periodicMessage]["INTERVAL"] * 60000); // milliseconds = minutes * 60 * 1000
+		periodicMessageTimers.push(timer);
 	}
 }
 
@@ -413,18 +427,18 @@ function counterGet(target, user, commandName, args) {
 // Most of the browser source/web server stuff is experimental
 // and will be used more in later releases
 function onWebRequest(request, response) {
-	const querystring=request.url;
+	const querystring = request.url;
 	console.log(`Web request: ${querystring}`);
 
-	if(querystring.startsWith("/lastSeen")) {
+	if (querystring.startsWith("/lastSeen")) {
 		response.writeHead(200);
 		response.write(`${seenUsers}`);
 		response.end();
-	} else if(querystring.startsWith("/alert")) {
+	} else if (querystring.startsWith("/alert")) {
 		response.writeHead(200);
 		response.write(`${browserSourceAlertContent}`);
 		response.end();
-	} else if(querystring.startsWith("/peng")) {
+	} else if (querystring.startsWith("/peng")) {
 		response.writeHead(200);
 		response.write('<html><head></head><body><iframe src="https://giphy.com/embed/VkMV9TldsPd28" width="480" height="270" frameBorder="0" class="giphy-embed" allowFullScreen></iframe><p><a href="https://giphy.com/gifs/penguin-business-VkMV9TldsPd28"></a></p></body>');
 		response.end();
@@ -481,9 +495,9 @@ function greetUser(target, user, commandName) {
 // replacements is an array of values to insert into the string replacing _1_, _2_, _3_, .etc
 // If message is an array, one will be chosen at random.
 function sendChat(target, user, message, replacements) {
-	if(target && message && message.length > 0) {
+	if (target && message && message.length > 0) {
 		let reply;
-		if(Array.isArray(message)) {
+		if (Array.isArray(message)) {
 			var num = Math.floor(Math.random() * message.length);
 			reply = message[num];
 		} else {
@@ -491,13 +505,13 @@ function sendChat(target, user, message, replacements) {
 		}
 
 		// Replace username
-		if(user && user.username) {
+		if (user && user.username) {
 			reply = reply.replace(cUSERNAME, user.username)
 		}
 
 		// replace the positional parameters
-		if(replacements) {
-			for(let index=1; index<=9 && replacements[index]; index++) {
+		if (replacements) {
+			for (let index = 1; index <= 9 && replacements[index]; index++) {
 				reply = reply.replace(`_${index}_`, replacements[index]);
 			}
 		}
@@ -508,7 +522,7 @@ function sendChat(target, user, message, replacements) {
 
 // Shout out a user.The shoutoutCommand should contain USERNAME for sendChat to replace with the username
 function sendShoutOut(target, user, shoutOutCommand, replacements) {
-	setTimeout( ()=> {
+	setTimeout(() => {
 		sendChat(target, user, shoutOutCommand, replacements);
 	}, 5000, target, user, shoutOutCommand, replacements);
 }
@@ -518,9 +532,9 @@ function sendShoutOut(target, user, shoutOutCommand, replacements) {
 // replacements is an array of values to insert into the string replacing _1_, _2_, _3_, .etc
 // If media is an array, one will be chosen at random.
 function playMedia(target, user, media, replacements) {
-	if(env.MEDIA_PLAYER_COMMAND && media && media.length > 0) {
+	if (env.MEDIA_PLAYER_COMMAND && media && media.length > 0) {
 		let file;
-		if(Array.isArray(media)) {
+		if (Array.isArray(media)) {
 			var num = Math.floor(Math.random() * media.length);
 			file = media[num];
 		} else {
@@ -529,13 +543,13 @@ function playMedia(target, user, media, replacements) {
 		let command = env.MEDIA_PLAYER_COMMAND.replace(cMEDIAFILE, file);
 
 		// Replace username
-		if(user && user.username) {
+		if (user && user.username) {
 			command = command.replace(cUSERNAME, user.username)
 		}
 
 		// replace the positional parameters
-		if(replacements) {
-			for(let index=1; index<=9 && replacements[index]; index++) {
+		if (replacements) {
+			for (let index = 1; index <= 9 && replacements[index]; index++) {
 				command = command.replace(`_${index}_`, replacements[index]);
 			}
 		}
@@ -563,9 +577,9 @@ function isFirstTimeChatter(username) {
 		// We need to lowercase names for comparison
 		username = username.toLowerCase();
 		// Initialze allChatters here to simplify the logic if the file doesn't exist
-		let allChatters="";
+		let allChatters = "";
 
-		if(fs.existsSync(allChattersFile)) {
+		if (fs.existsSync(allChattersFile)) {
 			// read contents of the allChatters file
 			allChatters = fs.readFileSync(allChattersFile, 'UTF-8');
 			if (allChatters.includes(username)) {
@@ -620,11 +634,13 @@ function loadConfigFile() {
 		if (envNew && Object.keys(envNew).length > 0) {
 			env = envNew;
 		}
+
+		runPeriodicMessages();
 	} catch (err) {
 		console.log(`Error loading configuration file: ${err}`);
 
 		// If this is the first load, then exit.  Otherwise warn in chat and just don't update env
-		if(channel && client) {
+		if (channel && client) {
 			client.say(channel, `Could not load configuration file, continuing with existing configuration.`);
 		} else {
 			exit(1);

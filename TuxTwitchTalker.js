@@ -147,6 +147,7 @@ function runAdminCommand(target, user, commandName, args) {
 			console.log(`Seen list is now ${seenUsers}`);
 		} else if (commandName === '!!exit') {
 			console.log(`Exiting due to !!exit command`);
+			process.exit(1);
 		} else if (commandName === "!!reload") {
 			loadConfigFile();
 		} else if (commandName.startsWith("!!delSeen ")) {

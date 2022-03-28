@@ -160,17 +160,22 @@
 			"CHAT":		"Cat was mentioned at the beginning of a line",
 			"MEDIA":	"../sounds/cat-meow-short_nice.mp3"
 		},
-		"COMMENT": [
-			"Timers are created by the !!timer command.  When the timer runs out, these alerts will be triggered.  All timers use the same alerts",
-			"The word TIMERNAME will be replaced with the name of the timer given when created, so you can use different media files for each."
-		],
+		"^!clap": {
+			"CHAT": 	"Clap Clap Clap Clap Clap",
+			"MEDIA":	"../sounds/applause-4.mp3"
+		},
 		"(LOL|LUL|laugh)": {
 			"MEDIA":	"../sounds/laughter-short.mp3"
-		},		"^!boss":  {
+		},
+		"^!boss":  {
 			"CHAT":		"YOU da boss, USERNAME!"
 		},
 		"^!pronouns": {
 			"CHAT":		"There are plugins to display Twitch users' pronouns next to their name to promote inclusiveness!  * * * Chrome: https://chrome.google.com/webstore/detail/twitch-chat-pronouns/agnfbjmjkdncblnkpkgoefbpogemfcii  * * * Firefox: https://addons.mozilla.org/en-US/firefox/addon/twitch-chat-pronouns/  * * * Select your pronouns: https://pronouns.alejo.io/"
+		},
+		"^!!language (\\w+)": {
+			"CHAT":		"FIRST AND ONLY WARNING _1_: This channel is far from PG, but I will not tolerate hate speech, attacking the underserved/PoC/LGBTQIA+",
+			"MEDIA":	"../sounds/red_alert_short.mp3"
 		},
 		"^!lurk": {
 			"CHAT":		"FeelsBadMan USERNAME is now lurking as a background process FeelsBadMan"

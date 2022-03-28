@@ -1,6 +1,6 @@
 {
   "name": "TuxTwitchTalker",
-  "version": "2.2.0",
+  "version": "2.2.1",
   "description": "A Twitch bot which enables per-user greetings and interactions, chat commands, and more to come",
   "main": "TuxTwitchTalker.js",
   "scripts": {

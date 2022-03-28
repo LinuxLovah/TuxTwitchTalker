@@ -51,7 +51,7 @@ Features, already implemented
   * **!timer [MINUTES] [TIMERNAME]**: Start a timer that will wait the specified number of minutes and then alert when the timer is done, with it's name.  The alert can be a message sent to chat and/or playing a mediafile.
     * **!timer 5 Five minutes of exercise**
     * **!timer 1.5** (Timer for 90 seconds with no name)
-  * **Counters**: Any number of separate counters, identified by a unique word, can be tracked and updated.  The counter commands start with **!+** (increment), **!-** (decrement), **!=** (set), and **!?** (query), IMMEDIATELY followed by the word that identifies that timer (no space in between).  For increment and decrement you can specify an offet.
+  * **Counters**: Any number of separate counters, identified by a unique word (letters, numbers, underscore, dash only), can be tracked and updated.  The counter commands start with **!+** (increment), **!-** (decrement), **!=** (set), and **!?** (query), IMMEDIATELY followed by the word that identifies that timer (no space in between).  For increment and decrement you can specify an offet.  Values are stored in a file, so they are persisted across runs of the bot.
     * **!+burp**: Increment the burp counter by 1, or set it to 1 if it doesn't exist
     * **!+burp 3**: Increment the burp counter by 3, or set it to 3 if it doesn't exist
     * **!-deaths**: Decrement the deaths counter by 1, set to zero if it would be negative

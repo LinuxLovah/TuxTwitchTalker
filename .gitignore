@@ -102,3 +102,16 @@ dist
 
 # TernJS port file
 .tern-port
+
+# data files
+data/all_chatters.txt
+data/counter_*
+data/giphy_popup.html
+
+# my config file
+config.json
+
+# directories
+sounds
+.history
+.vscode

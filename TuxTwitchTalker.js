@@ -24,7 +24,6 @@ const url = require('url');
 var allChattersFile = "data/all_chatters.txt";
 var browserSourceAlertContent = "";
 var configFile = "";
-var counters = {};
 var env = {};
 var periodicMessageTimers = [];
 var seenUsers = [];
@@ -193,7 +192,7 @@ function runUserCommand(target, user, commandName, args) {
 	} else if (commandName.startsWith("!=") && isFeatureEnabled("counter")) {
 		counterSet(target, user, commandName, args);
 	} else if (commandName.startsWith("!?") && isFeatureEnabled("counter")) {
-		counterGet(target, user, commandName, args);
+		counterQuery(target, user, commandName, args);
 	}
 }
 
@@ -353,50 +352,69 @@ function runTimer(target, user, commandName, args) {
 
 
 function counterInc(target, user, commandName, args) {
-	let counterName = args[0].substring(2);
+	let counterName = getCounterName(args[0].substring(2));
 	let offset = Number(args[2]);
 	if (isNaN(Number(offset))) {
 		offset = 1;
 	}
-	if (counterName in counters) {
-		counters[counterName] += offset;
-	} else {
-		counters[counterName] = 1;
-	}
-	counterGet(target, user, commandName, args);
+	let count = counterRead(counterName) + offset;
+	counterWrite(counterName, count);
+	counterSay(target, user, counterName, count);
 }
 
+
 function counterDec(target, user, commandName, args) {
-	let counterName = args[0].substring(2);
+	let counterName = getCounterName(args[0].substring(2));
 	let offset = Number(args[2]);
 	if (isNaN(Number(offset))) {
 		offset = 1;
 	}
-	if (counterName in counters && (counters[counterName] - offset > 0)) {
-		counters[counterName] -= offset;
-	} else {
-		counters[counterName] = 0;
-	}
-	counterGet(target, user, commandName, args);
+	let count = Math.max(counterRead(counterName) - offset, 0);
+	counterWrite(counterName, count);
+	counterSay(target, user, counterName, count);
 }
 
 function counterSet(target, user, commandName, args) {
-	let counterName = args[0].substring(2);
+	let counterName = getCounterName(args[0].substring(2));
 	let count = Number(args[2]);
-	if (!isNaN(Number(count))) {
-		counters[counterName] = count;
+	if (isNaN(Number(count))) {
+		count = 0;
 	}
-	counterGet(target, user, commandName, args);
+	counterWrite(counterName, count);
+	counterSay(target, user, counterName, count);
 }
 
-function counterGet(target, user, commandName, args) {
-	let counterName = args[0].substring(2);
-	if (counterName in counters) {
-		client.say(target, `Counter ${counterName} is currently ${counters[counterName]}`);
-	} else {
-		client.say(target, `Counter ${counterName} does not exist`);
-	}
+function counterQuery(target, user, commandName, args) {
+	let counterName = getCounterName(args[0].substring(2));
+	let count = counterRead(counterName);
+	counterSay(target, user, counterName, count);
 }
+
+function counterSay(target, user, counterName, count) {
+	client.say(target, `Counter ${counterName} is currently ${count}`);
+}
+
+function counterRead(counterName) {
+	let currentValue = 0;
+	let counterFile = `data/counter_${counterName}.txt`;
+
+	if (fs.existsSync(counterFile)) {
+		// read contents of the allChatters file
+		currentValue = Number(fs.readFileSync(counterFile, 'UTF-8'));
+	}
+	return currentValue;
+}
+
+function counterWrite(counterName, currentValue) {
+	let counterFile = `data/counter_${counterName}.txt`;
+	fs.writeFileSync(counterFile, currentValue, 'UTF-8');
+}
+
+function getCounterName(counterName) {
+	counterName = counterName.replace(/[^a-zA-Z0-9_-]/g,'');
+	return counterName;
+}
+
 
 function runPeriodicMessages() {
 	// Unload any existing periodic messages

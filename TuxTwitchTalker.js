@@ -98,7 +98,10 @@ process.on('uncaughtException', function (err) {
 
 
 //--------------------- Browser Source web server
-if (isFeatureEnabled("webserver") && env.WEB_SERVER && env.WEB_SERVER.PORT) {
+if (isFeatureEnabled("webserver")) {
+	if(! env.WEB_SERVER) {
+		env.WEB_SERVER = { PORT:8888 };
+	}
 	webServer = http.createServer(onWebRequest).listen(env.WEB_SERVER.PORT);
 	console.log(`Web server has started listing on ${env.WEB_SERVER.PORT}`);
 	socketServer = new Server(webServer);
@@ -702,7 +705,9 @@ function counterWrite(counterName, counterValue) {
 
 	// Update any browser sources with the new number
 	console.log(`Socket server sending ${counterValue} to counter_${counterName}_update`);
-	socketServer.emit(`counter_${counterName}_update`, counterValue );
+	if (isFeatureEnabled("webserver")) {
+		socketServer.emit(`counter_${counterName}_update`, counterValue );
+	}
 }
 
 function getCounterName(counterName) {

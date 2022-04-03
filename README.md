@@ -17,7 +17,7 @@ This program is, and always will be, free and open source.  See **Licensing** be
 
 # Features, already implemented
 
-### **Greetings**
+## **Greetings**
 When a viewer types in chat for the first time since TuxTwitchTalker was started, they can be greeted with text sent to chat/media file.
   * Individual regular viewers can have a special greeting/media play for them
   * Mods can have a separate greeting/media play for them
@@ -28,24 +28,24 @@ When a viewer types in chat for the first time since TuxTwitchTalker was started
   * Greetings can have the new viewer's username inserted in the message.
   * Multiple greetings can be specified in an array, and one will be picked at random
 
-### **Periodic messages**
+## **Periodic messages**
 Messages sent to chat at a fixed rate.  This is often used for things like social links, channel rules, making up !commands, etc.
 
-### **Triggered messages**
+## **Triggered messages**
 Messages sent to chat when a specific word or phrase is mentioned.  This can be used for thanking subscribers/followers/raiders, responding to a phrase with a media file or message, etc.
    *  The trigger can be a [regular expression](https://www.oreilly.com/content/an-introduction-to-regular-expressions/)
    * messages can have the sender's username inserted in the message.
    * Multiple messages can be specified in an array, and one will be picked at random
    * Any triggered message starting with **!!** can only be used by administrators
 
-### **Forbidden phrases**
+## **Forbidden phrases**
 When a specific word or phrase is mentioned, the user can be just warned, they can be timed out for a specified number of seconds, or they can be banned.
    *  The trigger can be a [regular expression](https://www.oreilly.com/content/an-introduction-to-regular-expressions/)
    * messages can have the sender's username inserted in the message.
    * Multiple messages can be specified in an array, and one will be picked at random
    * Forbidden phrases can be optionally disabled for mods and VIPs via feature flag
 
-### **Administrative commands**
+## **Administrative commands**
 Administratuve commands can only be executed by specific users you specify in the configuration file.
 #### **!!greetingsOff**
 Disable greeting feature.  Useful for raids where lots of people start talking in chat at once
@@ -65,7 +65,7 @@ Stops the bot from running.
 ####  !!reload
 Reload the configuration file without restarting the bot. Useful when you make configuration changes mid-stream, like adding a greeting for a user.
 
-### **User commands**
+## **User commands**
 User commands can be run by everyone in chat.  All user commands can be turned on and off in the configuration.
 #### !dice
 Rolls a dice and replies in chat with the number (1-6) rolled.  This is mostly a proof of concept, as it was the first command I created.
@@ -75,25 +75,38 @@ Start a timer that will wait the specified number of minutes and then alert when
     * **!timer 5 Five minutes of exercise**
     * **!timer 1.5** (Timer for 90 seconds with no name)
 
-  #### Counters
-  Any number of separate counters, identified by a unique word (letters, numbers, underscore, dash only), can be tracked and updated.  The counter commands start with **!+** (increment), **!-** (decrement), **!=** (set), and **!?** (query), IMMEDIATELY followed by the word that identifies that timer (no space in between).  For increment and decrement you can specify an offset.
+#### Counters
+Any number of separate counters, identified by a unique word (letters, numbers, underscore, dash only), can be tracked and updated.  The counter commands start with **!+** (increment), **!-** (decrement), **!=** (set), and **!?** (query), IMMEDIATELY followed by the word that identifies that timer (no space in between).  For increment and decrement you can specify an offset.
 
-  Values are stored in a file, so they are persisted across runs of the bot.  They do not need to be pre-created.  Arbitrarily-named counters are created by just using the name.
+Values are stored in a file, so they are persisted across runs of the bot.  They do not need to be pre-created.  Arbitrarily-named counters are created by just using the name.
 
-  Counters can appear on your stream as a browser source using the URL **http://localhost:8888/counter/COUNTER_NAME_HERE** (eg http://localhost:8888/counter/deaths).  Port can be changed in configuration, and this assumes TuxTwitchTalker is running on the same computer as OBS.  If that's not the case then replace localhost with the URL of that computer.  The browser source content template is **html/counter_template.html**, but a counter-specific one will be used if html/counter_COUNTER_NAME_template.html (eg html/counter_deaths_template.html) exists.
+Examples:
+* **!+burp**: Increment the burp counter by 1, or set it to 1 if it doesn't exist
+* **!+burp 3**: Increment the burp counter by 3, or set it to 3 if it doesn't exist
+* **!-deaths**: Decrement the deaths counter by 1, set to zero if it would be negative
+* **!-deaths 2**: Decrement the deaths counter by 2, set to zero if it would be negative
+* **!=follows 5**: Set the follows counter to 5
+* **!?donuts**: Query the donut counter.  It is never high enough.
 
-  Example commands
-  * **!+burp**: Increment the burp counter by 1, or set it to 1 if it doesn't exist
-  * **!+burp 3**: Increment the burp counter by 3, or set it to 3 if it doesn't exist
-  * **!-deaths**: Decrement the deaths counter by 1, set to zero if it would be negative
-  * **!-deaths 2**: Decrement the deaths counter by 2, set to zero if it would be negative
-  * **!=follows 5**: Set the follows counter to 5
-  * **!?donuts**: Query the donut counter.  It is never high enough.
+## Random File Line Commands
+Send a random line from a text file to chat when a command is executed.  This can be used for random facts, choosing from a collection of things, pick a random reward from a list, whatever you want.  This is really unique functionality.  Think of it like the magic 8 ball command but you have complete control of the content.
 
-#### Random File Line Commands
-Send a random line from a text file to chat when a command is executed.  This can be used for random facts, choosing from a collection of things, pick a random reward from a list, whatever you want.  This is really unique functionality.  As shipped, the bot is configured with a **!dadjoke** command that will send a random joke from a file to chat.
+As shipped, the bot is configured with a **!dadjoke** command that will send a random joke from a file to chat.
 
-### Feature flags
+## **Web server browser sources**
+TuxTwitchTaker has a built-in web server that can be used as a browser source in your streaming software (like OBS) to expose information from the bot.  I have much more planned to do with this feature now that I have it working, so look for more goodies here.
+
+The below documentation assumes TuxTwitchTalker is running on the same computer as your streaming software.  If that's not the case then replace **localhost** with the URL of the computer TuxTwitchTalker is running on.  The port can be changed in the configuration file.
+
+No styling is needed in the template because it can be implemented in the browser source configuration in your streaming software. For instance:
+
+    body { color: rgb(255, 10, 10); background-color: rgba(0, 0, 0, 0); font-size: 40px; margin: 0px auto; overflow: hidden; }
+
+will make the text red and medium sized, transparent background, no margins.
+#### **Counters**
+Counters can appear on your stream as a browser source using the URL **http://localhost:8888/counter/COUNTER_NAME_HERE** (eg http://localhost:8888/counter/deaths).  The browser source content template is **html/counter_template.html**, but a counter-specific one will be used if it exists.  The naming convention is html/counter_COUNTER_NAME_template.html (eg html/counter_deaths_template.html) exists.  Using these templates, you can customize how the browser source looks.  The string COUNTER_NAME is replaced with the name of the counter, and the string COUNTER_VALUE is replaced with the current value of that counter.
+
+## Feature flags
 Many features and commands can be enabled or disabled without changing the code.
 
 
@@ -122,7 +135,7 @@ My goal is to get most of these features implemented by mid-2022.
 TuxTwitchTalker is released under the [Apache 2.0 licence ](https://www.apache.org/licenses/LICENSE-2.0).  A simplified explanation of this license [from Wikipedia](https://en.wikipedia.org/wiki/Apache_License) is:
 > The Apache License is a permissive free software license written by the Apache Software Foundation (ASF).[5] It allows users to use the software for any purpose, to distribute it, to modify it, and to distribute modified versions of the software under the terms of the license, without concern for royalties.
 
-In essence, anyone can use TuxTwitchTalker, but I don't want a company (like Streamlabs) to take it and sell it as a commercial product.  It will ALWAYS be free and open source.
+In essence, anyone can use TuxTwitchTalker, but I don't want a company (like Streamlabs) to take it and sell it as a commercial product.  It will ALWAYS be free and open source.  However, I do appreciate attribution/mentions in your About panels or periodic messages in your chat.
 
 # Creating An Account For Your Bot
 

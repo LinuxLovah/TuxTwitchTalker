@@ -133,6 +133,18 @@
 		"third_message": {
 			"INTERVAL": 32,
 			"CHAT":		"Print this in chat ever 30 minutes"
+		},
+		"pronouns": {
+			"INTERVAL": 46,
+			"CHAT":		"There are plugins to display Twitch users' pronouns next to their name to promote inclusiveness!  * * * Chrome: https://chrome.google.com/webstore/detail/twitch-chat-pronouns/agnfbjmjkdncblnkpkgoefbpogemfcii  * * * Firefox: https://addons.mozilla.org/en-US/firefox/addon/twitch-chat-pronouns/  * * * Select your pronouns: https://pronouns.alejo.io/"
+		},
+		"social_links": {
+			"INTERVAL": 39,
+			"CHAT":		"Social links: https://twitter.com/LinuxLovahTTV  *  https://discord.gg/dJeFM2GpZN  *  https://www.youtube.com/channel/UCmLcZzFhqCEoHbqYn-EHRuA ** https://www.tiktok.com/@linuxlovah"
+		},
+		"ttt": {
+			"INTERVAL": 118,
+			"CHAT":		"Small streamer without a lot of mods?  Need more automation in your stream so you can focus on content?  I created a free open source Twitch chat bot called TuxTwitchTalker, and I'll even help you set it up. Check it out at https://github.com/LinuxLovah/TuxTwitchTalker"
 		}
 	},
 	"COMMENT_TRIGGERED_MESSAGES": [
@@ -222,5 +234,12 @@
 	"TIMER_ALERT": {
 		"CHAT":		"Timer TIMERNAME is done!",
 		"MEDIA":	"../sounds/ding-sound-effect_2.mp3"
+	},
+	"COMMENT_WEB_SERVER": [
+		"Web server settings are for using TuxTwitchTalker as a browser source",
+		"You should not need to change these values."
+	],
+	"WEB_SERVER": {
+		"PORT":		8888
 	}
 }

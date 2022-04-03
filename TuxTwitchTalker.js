@@ -7,6 +7,7 @@
  * 		https://d-fischer.github.io/twitch-chat-client/reference/classes/ChatClient.html
  * 		https://github.com/tmijs/tmi.js/issues/363
  * 		https://twurple.js.org/docs/examples/chat/basic-bot.html
+ * 		https://socket.io/get-started/chat
  */
 
 
@@ -19,6 +20,8 @@ const { exec } = require("child_process");
 const { exit } = require('process');
 const http = require('http');
 const url = require('url');
+const { Server } = require("socket.io");
+
 
 //--------------------- Global variables
 var allChattersFile = "data/all_chatters.txt";
@@ -27,6 +30,11 @@ var configFile = "";
 var env = {};
 var periodicMessageTimers = [];
 var seenUsers = [];
+var webServer;
+var socketServer;
+
+
+var hitCounter=0;
 
 //--------------------- Constants
 const cBAN = "BAN";
@@ -90,10 +98,17 @@ process.on('uncaughtException', function (err) {
 
 
 //--------------------- Browser Source web server
-if (isFeatureEnabled("webserver")) {
-	http.createServer(onWebRequest).listen(8888);
-	console.log('Web server has started listing on 8888');
-}
+if (isFeatureEnabled("webserver") && env.WEB_SERVER && env.WEB_SERVER.PORT) {
+	webServer = http.createServer(onWebRequest).listen(env.WEB_SERVER.PORT);
+	console.log(`Web server has started listing on ${env.WEB_SERVER.PORT}`);
+	socketServer = new Server(webServer);
+	socketServer.on('connection', (socket) => {
+		console.log('Socket connection established');
+		socket.on('disconnect', () => {
+			console.log('user disconnected');
+	  });
+	});
+};
 
 //--------------------- Event Handlers
 // Called every time the bot connects to Twitch chat
@@ -351,71 +366,6 @@ function runTimer(target, user, commandName, args) {
 }
 
 
-function counterInc(target, user, commandName, args) {
-	let counterName = getCounterName(args[0].substring(2));
-	let offset = Number(args[2]);
-	if (isNaN(Number(offset))) {
-		offset = 1;
-	}
-	let count = counterRead(counterName) + offset;
-	counterWrite(counterName, count);
-	counterSay(target, user, counterName, count);
-}
-
-
-function counterDec(target, user, commandName, args) {
-	let counterName = getCounterName(args[0].substring(2));
-	let offset = Number(args[2]);
-	if (isNaN(Number(offset))) {
-		offset = 1;
-	}
-	let count = Math.max(counterRead(counterName) - offset, 0);
-	counterWrite(counterName, count);
-	counterSay(target, user, counterName, count);
-}
-
-function counterSet(target, user, commandName, args) {
-	let counterName = getCounterName(args[0].substring(2));
-	let count = Number(args[2]);
-	if (isNaN(Number(count))) {
-		count = 0;
-	}
-	counterWrite(counterName, count);
-	counterSay(target, user, counterName, count);
-}
-
-function counterQuery(target, user, commandName, args) {
-	let counterName = getCounterName(args[0].substring(2));
-	let count = counterRead(counterName);
-	counterSay(target, user, counterName, count);
-}
-
-function counterSay(target, user, counterName, count) {
-	client.say(target, `Counter ${counterName} is currently ${count}`);
-}
-
-function counterRead(counterName) {
-	let currentValue = 0;
-	let counterFile = `data/counter_${counterName}.txt`;
-
-	if (fs.existsSync(counterFile)) {
-		// read contents of the allChatters file
-		currentValue = Number(fs.readFileSync(counterFile, 'UTF-8'));
-	}
-	return currentValue;
-}
-
-function counterWrite(counterName, currentValue) {
-	let counterFile = `data/counter_${counterName}.txt`;
-	fs.writeFileSync(counterFile, currentValue, 'UTF-8');
-}
-
-function getCounterName(counterName) {
-	counterName = counterName.replace(/[^a-zA-Z0-9_-]/g,'');
-	return counterName;
-}
-
-
 function runPeriodicMessages() {
 	// Unload any existing periodic messages
 	for (const timer of periodicMessageTimers) {
@@ -446,23 +396,47 @@ function runPeriodicMessages() {
 // Most of the browser source/web server stuff is experimental
 // and will be used more in later releases
 function onWebRequest(request, response) {
-	const querystring = request.url;
-	console.log(`Web request: ${querystring}`);
+	const queryString = request.url;
+	console.log(`Web request: ${queryString}`);
 
-	if (querystring.startsWith("/lastSeen")) {
+	if (queryString.startsWith("/lastSeen")) {
 		response.writeHead(200);
 		response.write(`${seenUsers}`);
 		response.end();
-	} else if (querystring.startsWith("/alert")) {
+	} else if (queryString.startsWith("/alert")) {
 		response.writeHead(200);
 		response.write(`${browserSourceAlertContent}`);
 		response.end();
-	} else if (querystring.startsWith("/peng")) {
+	} else if (queryString.startsWith("/counter")) {
+		serveCounter(queryString, response);
+	} else if (queryString.startsWith("/media")) {
 		response.writeHead(200);
-		response.write('<html><head></head><body><iframe src="https://giphy.com/embed/VkMV9TldsPd28" width="480" height="270" frameBorder="0" class="giphy-embed" allowFullScreen></iframe><p><a href="https://giphy.com/gifs/penguin-business-VkMV9TldsPd28"></a></p></body>');
+		response.write(`<html><head><meta http-equiv="refresh" content="1000"></head><body>TEST HERE ${hitCounter++}</body></html>`);
+		response.end();
+	} else if (queryString.startsWith("/peng")) {
+		response.writeHead(200);
+		response.write('<html><head></head><body><iframe src="https://giphy.com/embed/VkMV9TldsPd28" frameBorder="0" ></iframe></body>');
 		response.end();
 	}
 }
+
+function serveCounter(queryString, response) {
+	var counterName = getCounterName(queryString.match(/[a-zA-Z0-9_-]*$/)[0]);
+	console.log(`Counter is "${counterName}"`);
+	var counterValue = counterRead(counterName);
+
+	var content="";
+	if (fs.existsSync(`html/counter_${counterName}_template.html`)) {
+		content = fs.readFileSync(`html/counter_${counterName}_template.html`, 'UTF-8');
+	} else {
+		content = fs.readFileSync(`html/counter_template.html`, 'UTF-8');
+	}
+	content = content.replace(/COUNTER_NAME/g, counterName).replace(/COUNTER_VALUE/g, counterValue);
+	response.writeHead(200);
+	response.write(content);
+	response.end();
+}
+
 
 
 //--------------------- Helper Methods
@@ -665,4 +639,73 @@ function loadConfigFile() {
 			exit(1);
 		}
 	}
+}
+
+// Counters
+function counterInc(target, user, commandName, args) {
+	let counterName = getCounterName(args[0].substring(2));
+	let offset = Number(args[2]);
+	if (isNaN(Number(offset))) {
+		offset = 1;
+	}
+	let counterValue = counterRead(counterName) + offset;
+	counterWrite(counterName, counterValue);
+	counterSay(target, user, counterName, counterValue);
+}
+
+
+function counterDec(target, user, commandName, args) {
+	let counterName = getCounterName(args[0].substring(2));
+	let offset = Number(args[2]);
+	if (isNaN(Number(offset))) {
+		offset = 1;
+	}
+	let counterValue = Math.max(counterRead(counterName) - offset, 0);
+	counterWrite(counterName, counterValue);
+	counterSay(target, user, counterName, counterValue);
+}
+
+function counterSet(target, user, commandName, args) {
+	let counterName = getCounterName(args[0].substring(2));
+	let counterValue = Number(args[2]);
+	if (isNaN(Number(counterValue))) {
+		counterValue = 0;
+	}
+	counterWrite(counterName, counterValue);
+	counterSay(target, user, counterName, counterValue);
+}
+
+function counterQuery(target, user, commandName, args) {
+	let counterName = getCounterName(args[0].substring(2));
+	let counterValue = counterRead(counterName);
+	counterSay(target, user, counterName, counterValue);
+}
+
+function counterSay(target, user, counterName, counterValue) {
+	client.say(target, `Counter ${counterName} is currently ${counterValue}`);
+}
+
+function counterRead(counterName) {
+	let currentValue = 0;
+	let counterFile = `data/counter_${counterName}.txt`;
+
+	if (fs.existsSync(counterFile)) {
+		// read contents of the allChatters file
+		currentValue = Number(fs.readFileSync(counterFile, 'UTF-8'));
+	}
+	return currentValue;
+}
+
+function counterWrite(counterName, counterValue) {
+	let counterFile = `data/counter_${counterName}.txt`;
+	fs.writeFileSync(counterFile, counterValue.toString(), 'UTF-8');
+
+	// Update any browser sources with the new number
+	console.log(`Socket server sending ${counterValue} to counter_${counterName}_update`);
+	socketServer.emit(`counter_${counterName}_update`, counterValue );
+}
+
+function getCounterName(counterName) {
+	counterName = counterName.replace(/[^a-zA-Z0-9_-]/g,'');
+	return counterName;
 }

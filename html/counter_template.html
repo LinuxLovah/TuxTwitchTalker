@@ -1,0 +1,28 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+	<title>TuxTwitchTalker counter: COUNTER_NAME</title>
+	<style>
+		body {
+		  color: rgb(53, 53, 235);
+		}
+	</style>
+</head>
+
+<body>
+	<span id="counterName">COUNTER_NAME</span>:<span id="counterValue">COUNTER_VALUE</span>
+
+	<script src="/socket.io/socket.io.js"></script>
+	<script>
+		var valueElement=document.getElementById('counterValue');
+		var socket = io();
+		console.log('Socket created');
+
+		socket.on('counter_COUNTER_NAME_update', function(msg) {
+			valueElement.textContent = msg;
+  		});
+	</script>
+</body>
+
+</html>

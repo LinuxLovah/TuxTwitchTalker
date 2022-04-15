@@ -15,6 +15,7 @@ Most users will not need to change (or even understand) the program itself.  All
 
 This program is, and always will be, free and open source.  See **Licensing** below.
 
+___
 # Features, already implemented
 
 ## **Greetings**
@@ -94,23 +95,34 @@ Send a random line from a text file to chat when a command is executed.  This ca
 As shipped, the bot is configured with a **!dadjoke** command that will send a random joke from a file to chat.
 
 ## **Web server browser sources**
-TuxTwitchTaker has a built-in web server that can be used as a browser source in your streaming software (like OBS) to expose information from the bot.  I have much more planned to do with this feature now that I have it working, so look for more goodies here.
+TuxTwitchTaker has a built-in web server that can be used as a browser source in your streaming software (like OBS) to expose information from the bot.  The base browser source functionality was added in version 2.3.0.  I have much more planned to do with this feature now that I have it working, so look for more goodies here.
 
-The below documentation assumes TuxTwitchTalker is running on the same computer as your streaming software.  If that's not the case then replace **localhost** with the URL of the computer TuxTwitchTalker is running on.  The port can be changed in the configuration file.
+Each browser source is associated with one or more separate template filess, so the content to send can be changed without modifying the main program at all.
 
-No styling is needed in the template because it can be implemented in the browser source configuration in your streaming software. For instance:
+No styling is needed in the template because styling can be specified in the browser source configuration in your streaming software. For instance:
 
     body { color: rgb(255, 10, 10); background-color: rgba(0, 0, 0, 0); font-size: 40px; margin: 0px auto; overflow: hidden; }
 
 will make the text red and medium sized, transparent background, no margins.
+
+
+The below documentation assumes TuxTwitchTalker is running on the same computer as your streaming software,and using the default port of **8888**.  If that's not the case then replace **localhost** with the URL of the computer TuxTwitchTalker is running on.  The port can be changed in the configuration file.
+### Browser sources
+
+#### **Playing media**
+Sound files can be played on the local system by using the media player application defined by the **MEDIA_PLAYER_COMMAND** entry in the config file, or through the media browser source.  If the **AUDIO_FILE_PATH** parameter is defined in the **WEB_SERVER** section, then all media will be played through the browser source instead of the local media player.  All media played through the browser source must come from this directory (which can be relative or absolute) for security reasons, to guarantee no files can be accessed from unintended paths.
+
+The browser source URL for media is **http://localhost:8888/media**, and if using OBS, it's a good idea to select the **Control audio via OBS** option and include that source in all scenes, so you can control the volume separately.  Future versions will allow images and possibly video clips to be sent to the browser source.  The browser source content template is **html/media_template.html**
+
 #### **Counters**
 Counters can appear on your stream as a browser source using the URL **http://localhost:8888/counter/COUNTER_NAME_HERE** (eg http://localhost:8888/counter/deaths).  The browser source content template is **html/counter_template.html**, but a counter-specific one will be used if it exists.  The naming convention is html/counter_COUNTER_NAME_template.html (eg html/counter_deaths_template.html) exists.  Using these templates, you can customize how the browser source looks.  The string COUNTER_NAME is replaced with the name of the counter, and the string COUNTER_VALUE is replaced with the current value of that counter.
 
+
 ## Feature flags
-Many features and commands can be enabled or disabled without changing the code.
+Many features and commands can be enabled or disabled without changing the code.  See the **COMMANDS_FEATURE_FLAGS** section in the configuration file.
 
 
-
+___
 # Features, planned
 
 * Greeting/media on raid
@@ -119,17 +131,15 @@ Many features and commands can be enabled or disabled without changing the code.
 * Greeting/media on sub/resub
 * Greeting/media on gift sub
 
-
-# Potential long-term features
+### Potential long-term features
 
 * A way to alert with video in addition to media and chat messages
 * A way to replace Streamlabs Labels to update files with latest follower, latest sub, etc.
 * Multi-tenant redesign so that one instance of TuxTwitchTalker can respond to the chat for multiple streamers, each with their separate configuration.
-* Browser source (web server) to push visual content to broadcasting software: Right now the Proof Of Concept web server exists in the code, turned off in the feature flags by default.  I don't want to remove that code because I expect to continue that work soon.
 
 My goal is to get most of these features implemented by mid-2022.
 
-
+___
 # Licensing
 
 TuxTwitchTalker is released under the [Apache 2.0 licence ](https://www.apache.org/licenses/LICENSE-2.0).  A simplified explanation of this license [from Wikipedia](https://en.wikipedia.org/wiki/Apache_License) is:
@@ -137,6 +147,7 @@ TuxTwitchTalker is released under the [Apache 2.0 licence ](https://www.apache.o
 
 In essence, anyone can use TuxTwitchTalker, but I don't want a company (like Streamlabs) to take it and sell it as a commercial product.  It will ALWAYS be free and open source.  However, I do appreciate attribution/mentions in your About panels or periodic messages in your chat.
 
+___
 # Creating An Account For Your Bot
 
 While not strictly necessary, it's a good idea to make a separate Twitch account for your bot, so you can control its access, and it's less confusing for your viewers when bot messages come from a separate user.
@@ -146,6 +157,7 @@ While not strictly necessary, it's a good idea to make a separate Twitch account
 3. The library I use for chat communications, [tmi.js](https://tmijs.com/), requires an oAuth token that you will need to put in your TuxTwitchTalker configuration file.  In a browser logged in as your bot, go to https://twitchapps.com/tmi/ and it will give you an oAuth token.  Make note of it.
 4. Go into Twitch Roles Manager and give your bot the moderator and editor roles.
 
+___
 # Installing TuxTwitchTalker
 
 To take full advantage of TuxTwitchTalker's features, it should be installed on your streaming computer.  You can install it on any computer, but some functionality, like playing media over stream, won't be sent to your broadcast.
@@ -161,7 +173,7 @@ To take full advantage of TuxTwitchTalker's features, it should be installed on 
 4. Run **npm install** in that shell to install all the NodeJS modules the project depends on.
 5. If you are running TuxTwitchTalker on your streaming computer and want the ability to play sounds on stream (a big part of the bot's functionality) you will need some sort of media player.  I find that the open source [VLC](https://www.videolan.org/) works very well for this purpose, is free and runs on almost anything.  The media player is configurable in the config file, but the sample config file already has the right parameters for VLC by default.
 
-
+___
 # Configuring TuxTwitchTalker
 
 TuxTwitchTalker is configured using [a JSON file](https://en.wikipedia.org/wiki/JSON), which allows complex expressions and lists to flexibly customize it.  The default configuration file is **config.json**
@@ -178,7 +190,7 @@ The most important settings to update before the bot will run are:
 - "ADMIN_USERS"
 - "CHANNELS"
 
-
+___
 # Running TuxTwitchTalker
 
 1. Open up a terminal/command window and change to the directory you set up TuxTwitchTalker in
@@ -189,6 +201,7 @@ If you need to specify an alternate configuration file, type
 > npm start MY_CONFIGURATION_FILE.json
 
 
+___
 # Support/Contact
 
 * [LinuxLovah@gmail.com](mailto:LinuxLovah@gmail.com)
@@ -196,6 +209,9 @@ If you need to specify an alternate configuration file, type
 * https://twitch.tv/LinuxLovah
 * I offer support [on my Discord server](https://discord.gg/dJeFM2GpZN) in the **#streaming-tech-talk** channel
 
-#Donations
+___
+# Donations
 
 I will NEVER charge for this bot. It will always be free open source.  If you would like to donate, though, [you can paypal me](https://www.paypal.com/donate/?business=MYYKAGE7725C4&no_recurring=0&currency_code=USD).
+
+I also appreciate, though do not require, that you leave the periodic message in mentioning TuxTwitchTalker, even if it runs very infrequently.

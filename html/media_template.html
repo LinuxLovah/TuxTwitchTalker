@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+	<title>TuxTwitchTalker Media Player</title>
+</head>
+
+<body>
+	<div id="media_player"></div>
+
+	<script src="/socket.io/socket.io.js"></script>
+	<script>
+		var mediaElement=document.getElementById('media_player');
+		var socket = io();
+		console.log('Media socket created');
+
+		socket.on('play_audio', function(msg) {
+			let baseFileName = msg;
+			let audioElement = document.createElement("audio");
+			audioElement.id = "audio-player";
+			audioElement.src = `audio/${baseFileName}`;
+			audioElement.type = "audio/mpeg";
+			audioElement.autoplay = "autoplay";
+			mediaElement.replaceChildren(audioElement);
+  		});
+	</script>
+</body>
+
+</html>

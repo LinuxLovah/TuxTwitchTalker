@@ -199,7 +199,9 @@ function runAdminCommand(target, user, commandName, args) {
 
 
 function runUserCommand(target, user, commandName, args) {
-	if (commandName === '!dice' && isFeatureEnabled("dice")) {
+	if (commandName === '!audio') {
+		updateMediaBrowserWithAudio("wilhelmscream.mp3");
+	} else if (commandName === '!dice' && isFeatureEnabled("dice")) {
 		runRollDice(target, user, commandName);
 	} else if (commandName.startsWith("!timer ")) {
 		runTimer(target, user, commandName, args);
@@ -396,26 +398,21 @@ function runPeriodicMessages() {
 }
 
 
-// Most of the browser source/web server stuff is experimental
-// and will be used more in later releases
+// Web server incoming request handler
 function onWebRequest(request, response) {
 	const queryString = request.url;
 	console.log(`Web request: ${queryString}`);
 
-	if (queryString.startsWith("/lastSeen")) {
-		response.writeHead(200);
-		response.write(`${seenUsers}`);
-		response.end();
+	if (queryString.startsWith("/audio/")) {
+		serveAudio(queryString, response);
 	} else if (queryString.startsWith("/alert")) {
 		response.writeHead(200);
 		response.write(`${browserSourceAlertContent}`);
 		response.end();
 	} else if (queryString.startsWith("/counter")) {
-		serveCounter(queryString, response);
+		serveCounterBrowserSource(queryString, response);
 	} else if (queryString.startsWith("/media")) {
-		response.writeHead(200);
-		response.write(`<html><head><meta http-equiv="refresh" content="1000"></head><body>TEST HERE ${hitCounter++}</body></html>`);
-		response.end();
+		serveMediaBrowserSource(queryString, response);
 	} else if (queryString.startsWith("/peng")) {
 		response.writeHead(200);
 		response.write('<html><head></head><body><iframe src="https://giphy.com/embed/VkMV9TldsPd28" frameBorder="0" ></iframe></body>');
@@ -423,7 +420,10 @@ function onWebRequest(request, response) {
 	}
 }
 
-function serveCounter(queryString, response) {
+// Sends the template with HTML and JS to view a particular counter.
+// Counter updates will call socketServer.emit to send the new counter value
+// which will trigger the page to update.
+function serveCounterBrowserSource(queryString, response) {
 	var counterName = getCounterName(queryString.match(/[a-zA-Z0-9_-]*$/)[0]);
 	console.log(`Counter is "${counterName}"`);
 	var counterValue = counterRead(counterName);
@@ -440,6 +440,38 @@ function serveCounter(queryString, response) {
 	response.end();
 }
 
+// Sends the template with HTML and JS to play media, but without the audio tag
+// serveAudio() will call socketServer.emit to send the audio tag for playing the media
+// and stream the audio file to the client.
+function serveMediaBrowserSource(queryString, response) {
+	var content="";
+	content = fs.readFileSync(`html/media_template.html`, 'UTF-8');
+	response.writeHead(200);
+	response.write(content);
+	response.end();
+}
+
+// Triggers the browser source to build an audio tag, which will request the audio
+function updateMediaBrowserWithAudio(baseFileName) {
+	socketServer.emit(`play_audio`, baseFileName );
+}
+
+function serveAudio(queryString, response) {
+	let filePath = getAudioFilePath(queryString);
+	if(filePath) {
+		let fileStat = fs.statSync(filePath);
+		// set response header info
+		response.writeHead(200, {
+			'Content-Type': 'audio/mpeg',
+			'Content-Length': fileStat.size
+		});
+		//create read stream
+		const readStream = fs.createReadStream(filePath);
+		// attach this stream with response stream
+		readStream.pipe(response);
+	}
+
+}
 
 
 //--------------------- Helper Methods
@@ -528,7 +560,7 @@ function sendShoutOut(target, user, shoutOutCommand, replacements) {
 // replacements is an array of values to insert into the string replacing _1_, _2_, _3_, .etc
 // If media is an array, one will be chosen at random.
 function playMedia(target, user, media, replacements) {
-	if (env.MEDIA_PLAYER_COMMAND && media && media.length > 0) {
+	if (media && media.length > 0) {
 		let file;
 		if (Array.isArray(media)) {
 			var num = Math.floor(Math.random() * media.length);
@@ -536,31 +568,38 @@ function playMedia(target, user, media, replacements) {
 		} else {
 			file = media;
 		}
-		let command = env.MEDIA_PLAYER_COMMAND.replace(cMEDIAFILE, file);
-
 		// Replace username
 		if (user && user.username) {
-			command = command.replace(cUSERNAME, user.username)
+			file = file.replace(cUSERNAME, user.username)
 		}
 
 		// replace the positional parameters
 		if (replacements) {
 			for (let index = 1; index <= 9 && replacements[index]; index++) {
-				command = command.replace(`_${index}_`, replacements[index]);
+				file = file.replace(`_${file}_`, replacements[index]);
 			}
 		}
 
-		exec(command, (error, stdout, stderr) => {
-			if (error) {
-				console.log(`error: ${error.message}`);
-				return;
-			}
-			if (stderr) {
-				console.log(`stderr: ${stderr}`);
-				return;
-			}
-			console.log(`stdout: ${stdout}`);
-		});
+		// If Media browser source is enabled, then use that, else play using external media player
+		if(env.WEB_SERVER && env.WEB_SERVER.AUDIO_FILE_PATH) {
+			updateMediaBrowserWithAudio(getAudioFileName(file));
+		} else if(env.MEDIA_PLAYER_COMMAND) {
+			let command = env.MEDIA_PLAYER_COMMAND.replace(cMEDIAFILE, file);
+
+			exec(command, (error, stdout, stderr) => {
+				if (error) {
+					console.log(`error: ${error.message}`);
+					return;
+				}
+				if (stderr) {
+					console.log(`stderr: ${stderr}`);
+					return;
+				}
+				console.log(`stdout: ${stdout}`);
+			});
+		} else {
+			console.log("ERROR: Neither MEDIA_PLAYER_COMMAND or WEB_SERVER.AUDIO_FILE_PATH. Can't play audio.");
+		}
 
 
 	}
@@ -711,6 +750,28 @@ function counterWrite(counterName, counterValue) {
 }
 
 function getCounterName(counterName) {
-	counterName = counterName.replace(/[^a-zA-Z0-9_-]/g,'');
+	counterName = counterName.replace(/[^a-zA-Z0-9_-]/g,"");
 	return counterName;
+}
+
+function getAudioFileName(baseFileName) {
+	return baseFileName.replace(/[/]*audio[/]*/,"").replace(/.*[/]/,"").replace(/[^.aaa-zA-Z0-9_-]/g,"");
+}
+
+// Take out the /audio/ part and ensure the baseFileName doesn't have any illegal characters
+// or paths that could lead to reading other directories or other shenanigans
+// Make sure the file exists
+function getAudioFilePath(baseFileName) {
+	if(env.WEB_SERVER && env.WEB_SERVER.AUDIO_FILE_PATH) {
+		baseFileName = getAudioFileName(baseFileName);
+		let fullPath = `${env.WEB_SERVER.AUDIO_FILE_PATH}/${baseFileName}`;
+		if(fs.existsSync(fullPath)) {
+			return fullPath;
+		} else {
+			console.log(`ERROR: audio file '${fullPath}' does not exist, cannot play audio`);
+		}
+	} else {
+		console.log(`ERROR: WEB_SERVER or WEB_SERVER.AUDIO_FILE_PATH not defined, cannot play audio`);
+	}
+	return("");
 }

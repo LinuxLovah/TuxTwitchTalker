@@ -168,10 +168,6 @@
 			"CHAT":		"Cat was mentioned, but guarantees its the word 'cat', not just 'cat' anywhere on the line, including part of another word",
 			"MEDIA":	"../sounds/cat-meow-short_nice.mp3"
 		},
-		"^cat": {
-			"CHAT":		"Cat was mentioned at the beginning of a line",
-			"MEDIA":	"../sounds/cat-meow-short_nice.mp3"
-		},
 		"^!clap": {
 			"CHAT": 	"Clap Clap Clap Clap Clap",
 			"MEDIA":	"../sounds/applause-4.mp3"
@@ -179,7 +175,7 @@
 		"(LOL|LUL|laugh)": {
 			"MEDIA":	"../sounds/laughter-short.mp3"
 		},
-		"^!boss":  {
+		"^!rmsg":  {
 			"CHAT":		"YOU da boss, USERNAME!"
 		},
 		"^!pronouns": {
@@ -237,9 +233,12 @@
 	},
 	"COMMENT_WEB_SERVER": [
 		"Web server settings are for using TuxTwitchTalker as a browser source",
-		"You should not need to change these values."
+		"You can usually leave the port as is.",
+		"AUDIO_FILE_PATH is the relative or absolute path to your sound files to play through the browser source, WITHOUT TRAILING SLASH",
+		"If AUDIO_FILE_PATH, all sounds will be played through the browser source instead of using your local media player."
 	],
 	"WEB_SERVER": {
-		"PORT":		8888
+		"PORT":			8888,
+		"AUDIO_FILE_PATH": "../sounds"
 	}
 }

@@ -44,6 +44,7 @@ const cBOT_NAME = 			"BOT_NAME";
 const cCHANNELS = 			"CHANNELS";
 const cCHAT = 				"CHAT";
 const cCOMMANDS_FEATURE_FLAGS =  "COMMANDS_FEATURE_FLAGS";
+const cCOUNTER = 			"counter";
 const cDEFAULT = 			"default";
 const cDEFAULT_MOD = 		"default_mod";
 const cDEFAULT_VIP = 		"default_vip";
@@ -60,6 +61,7 @@ const cPORT = 				"PORT";
 const cRANDOM_FILE_LINE_COMMANDS = "RANDOM_FILE_LINE_COMMANDS";
 const cSHOUTOUT = 			"SHOUTOUT";
 const cTIMER_ALERT = 		"TIMER_ALERT";
+const cTIMER = 				"timer";
 const cTIMERNAME = 			"TIMERNAME";
 const cTIMEOUT = 			"TIMEOUT";
 const cTMI_OAUTH = 			"TMI_OAUTH";
@@ -220,13 +222,13 @@ function runUserCommand(target, user, commandName, args) {
 		runRollDice(target, user, commandName);
 	} else if (commandName.startsWith("!timer ")) {
 		runTimer(target, user, commandName, args);
-	} else if (commandName.startsWith("!+") && isFeatureEnabled("counter")) {
+	} else if (commandName.startsWith("!+") && isFeatureEnabled(cCOUNTER)) {
 		counterInc(target, user, commandName, args);
-	} else if (commandName.startsWith("!-") && isFeatureEnabled("counter")) {
+	} else if (commandName.startsWith("!-") && isFeatureEnabled(cCOUNTER)) {
 		counterDec(target, user, commandName, args);
-	} else if (commandName.startsWith("!=") && isFeatureEnabled("counter")) {
+	} else if (commandName.startsWith("!=") && isFeatureEnabled(cCOUNTER)) {
 		counterSet(target, user, commandName, args);
-	} else if (commandName.startsWith("!?") && isFeatureEnabled("counter")) {
+	} else if (commandName.startsWith("!?") && isFeatureEnabled(cCOUNTER)) {
 		counterQuery(target, user, commandName, args);
 	}
 }
@@ -357,7 +359,7 @@ function runRandomFileLineCommands(target, user, commandName) {
 // Start a timer with the !timer command.  When the time is up,
 // the CHAT entry will be sent to chat and/or MEDIA entry played
 function runTimer(target, user, commandName, args) {
-	if (!isFeatureEnabled("timer")) {
+	if (!isFeatureEnabled(cTIMER)) {
 		return;
 	}
 

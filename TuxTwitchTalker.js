@@ -37,20 +37,35 @@ var socketServer;
 var hitCounter=0;
 
 //--------------------- Constants
-const cBAN = "BAN";
-const cCHAT = "CHAT";
-const cDEFAULT = "default";
-const cDEFAULT_MOD = "default_mod";
-const cDEFAULT_VIP = "default_vip";
-const cFEATURE_FLAGS = "COMMANDS_FEATURE_FLAGS";
+const cADMIN_USERS =		"ADMIN_USERS";
+const cAUDIO_FILE_PATH = 	"AUDIO_FILE_PATH";
+const cBAN = 				"BAN";
+const cBOT_NAME = 			"BOT_NAME";
+const cCHANNELS = 			"CHANNELS";
+const cCHAT = 				"CHAT";
+const cCOMMANDS_FEATURE_FLAGS =  "COMMANDS_FEATURE_FLAGS";
+const cDEFAULT = 			"default";
+const cDEFAULT_MOD = 		"default_mod";
+const cDEFAULT_VIP = 		"default_vip";
+const cFEATURE_FLAGS = 		"COMMANDS_FEATURE_FLAGS";
 const cFIRST_TIME_CHATTER = "first_time_chatter";
-const cMEDIA = "MEDIA";
-const cMEDIAFILE = "MEDIAFILE";
-const cSHOUTOUT = "SHOUTOUT";
-const cTIMER_ALERT = "TIMER_ALERT";
-const cTIMERNAME = "TIMERNAME";
-const cTIMEOUT = "TIMEOUT";
-const cUSERNAME = "USERNAME";
+const cFORBIDDEN_PHRASES = 	"FORBIDDEN_PHRASES";
+const cGREETINGS = 			"GREETINGS";
+const cIGNORE_USERS = 		"IGNORE_USERS";
+const cMEDIA = 				"MEDIA";
+const cMEDIAFILE = 			"MEDIAFILE";
+const cMEDIA_PLAYER_COMMAND = "MEDIA_PLAYER_COMMAND";
+const cPERIODIC_MESSAGES = 	"PERIODIC_MESSAGES";
+const cPORT = 				"PORT";
+const cRANDOM_FILE_LINE_COMMANDS = "RANDOM_FILE_LINE_COMMANDS";
+const cSHOUTOUT = 			"SHOUTOUT";
+const cTIMER_ALERT = 		"TIMER_ALERT";
+const cTIMERNAME = 			"TIMERNAME";
+const cTIMEOUT = 			"TIMEOUT";
+const cTMI_OAUTH = 			"TMI_OAUTH";
+const cTRIGGERED_MESSAGES = "TRIGGERED_MESSAGES";
+const cUSERNAME = 			"USERNAME";
+const cWEB_SERVER = 		"WEB_SERVER"
 
 //--------------------- Config
 // First parameter is the config file to load
@@ -67,16 +82,16 @@ if (!configFile || configFile.length === 0) {
 	process.exit(1);
 }
 loadConfigFile();
-const channel = env.CHANNELS[0];
+const channel = env[cCHANNELS][0];
 
 //--------------------- Connect and register handlers
 // Define tmi configuration options
 const opts = {
 	identity: {
-		username: env.BOT_NAME,
-		password: env.TMI_OAUTH
+		username: env[cBOT_NAME],
+		password: env[cTMI_OAUTH]
 	},
-	channels: env.CHANNELS
+	channels: env[cCHANNELS]
 };
 
 const client = new tmi.client(opts);
@@ -91,7 +106,7 @@ client.connect();
 process.on('uncaughtException', function (err) {
 	console.log("*** ERROR: UNHANDLED EXCEPTION ***");
 	console.log(err);
-	client.say(env.CHANNELS, `${env.BOT_NAME} technical difficulties, please check logs!`);
+	client.say(env[cCHANNELS], `${env[cBOT_NAME]} technical difficulties, please check logs!`);
 }
 );
 
@@ -99,11 +114,11 @@ process.on('uncaughtException', function (err) {
 
 //--------------------- Browser Source web server
 if (isFeatureEnabled("webserver")) {
-	if(! env.WEB_SERVER) {
-		env.WEB_SERVER = { PORT:8888 };
+	if(! env[cWEB_SERVER]) {
+		env[cWEB_SERVER] = { PORT:8888 };
 	}
-	webServer = http.createServer(onWebRequest).listen(env.WEB_SERVER.PORT);
-	console.log(`Web server has started listing on ${env.WEB_SERVER.PORT}`);
+	webServer = http.createServer(onWebRequest).listen(env[cWEB_SERVER][cPORT]);
+	console.log(`Web server has started listing on ${env[cWEB_SERVER][cPORT]}`);
 	socketServer = new Server(webServer);
 	socketServer.on('connection', (socket) => {
 		console.log('Socket connection established');
@@ -122,7 +137,7 @@ function onConnectedHandler(addr, port) {
 
 // Called every time a message comes in.  This is effectively the main chat processing loop.
 function onMessageHandler(target, user, msg) {
-	if (env.IGNORE_USERS && env.IGNORE_USERS.includes(user.username.toLowerCase())) {
+	if (env[cIGNORE_USERS] && env[cIGNORE_USERS].includes(user.username.toLowerCase())) {
 		return;
 	}
 
@@ -158,7 +173,7 @@ function onMessageHandler(target, user, msg) {
 
 
 function runAdminCommand(target, user, commandName, args) {
-	if (user && user.username && env.ADMIN_USERS.includes(user.username.toLowerCase())) {
+	if (user && user.username && env[cADMIN_USERS].includes(user.username.toLowerCase())) {
 		if (commandName === '!!clearSeen') {
 			seenUsers = [];
 			console.log(`Seen list is now ${seenUsers}`);
@@ -217,9 +232,9 @@ function runUserCommand(target, user, commandName, args) {
 }
 
 function runTriggeredMessage(target, user, message, args) {
-	for (const trigger in env.TRIGGERED_MESSAGES) {
+	for (const trigger in env[cTRIGGERED_MESSAGES]) {
 		// Triggered commands that start with !! are for admin users.
-		if (message.startsWith("!!") && user && user.username && !env.ADMIN_USERS.includes(user.username.toLowerCase())) {
+		if (message.startsWith("!!") && user && user.username && !env[cADMIN_USERS].includes(user.username.toLowerCase())) {
 			console.log(`User ${user.username} is not an admin and cannot run the triggered command ${message}`);
 			return
 		}
@@ -228,16 +243,16 @@ function runTriggeredMessage(target, user, message, args) {
 		const matches = message.match(regex);
 		if (matches) {
 			console.log(`Found triggered message matching ${regex}`);
-			if (cCHAT in env.TRIGGERED_MESSAGES[trigger]) {
-				let reply = env.TRIGGERED_MESSAGES[trigger][cCHAT];
+			if (cCHAT in env[cTRIGGERED_MESSAGES][trigger]) {
+				let reply = env[cTRIGGERED_MESSAGES][trigger][cCHAT];
 				sendChat(target, user, reply, matches);
 			}
-			if (cMEDIA in env.TRIGGERED_MESSAGES[trigger]) {
-				let mediaFile = env.TRIGGERED_MESSAGES[trigger][cMEDIA];
+			if (cMEDIA in env[cTRIGGERED_MESSAGES][trigger]) {
+				let mediaFile = env[cTRIGGERED_MESSAGES][trigger][cMEDIA];
 				playMedia(target, user, mediaFile);
 			}
-			if (cSHOUTOUT in env.TRIGGERED_MESSAGES[trigger]) {
-				let shoutOutCommand = env.TRIGGERED_MESSAGES[trigger][cSHOUTOUT];
+			if (cSHOUTOUT in env[cTRIGGERED_MESSAGES][trigger]) {
+				let shoutOutCommand = env[cTRIGGERED_MESSAGES][trigger][cSHOUTOUT];
 				sendShoutOut(target, user, shoutOutCommand, matches);
 			}
 		}
@@ -274,21 +289,21 @@ function runForbiddenPhrases(target, user, message, args) {
 		return;
 	}
 
-	for (const trigger in env.FORBIDDEN_PHRASES) {
+	for (const trigger in env[cFORBIDDEN_PHRASES]) {
 		const regex = new RegExp(trigger);
 		const matches = message.match(regex);
 		if (matches) {
 			console.log(`Found forbidden message matching ${regex}`);
-			if (cCHAT in env.FORBIDDEN_PHRASES[trigger]) {
-				let reply = env.FORBIDDEN_PHRASES[trigger][cCHAT];
+			if (cCHAT in env[cFORBIDDEN_PHRASES][trigger]) {
+				let reply = env[cFORBIDDEN_PHRASES][trigger][cCHAT];
 				sendChat(target, user, reply, matches);
 			}
-			if (cTIMEOUT in env.FORBIDDEN_PHRASES[trigger]) {
-				let timeoutSeconds = env.FORBIDDEN_PHRASES[trigger][cTIMEOUT];
+			if (cTIMEOUT in env[cFORBIDDEN_PHRASES][trigger]) {
+				let timeoutSeconds = env[cFORBIDDEN_PHRASES][trigger][cTIMEOUT];
 				console.log(`Timing out user ${user.username}`);
 				sendChat(target, user, `/timeout ${user.username} ${timeoutSeconds}`, matches);
 			}
-			if (cBAN in env.FORBIDDEN_PHRASES[trigger]) {
+			if (cBAN in env[cFORBIDDEN_PHRASES][trigger]) {
 				sendChat(target, user, `/ban ${user.username}`, matches);
 			}
 		}
@@ -333,8 +348,8 @@ function runRollDice(target, user, commandName) {
 // Some commands are to read a random line from a file.
 // These commands will be defined in the RANDOM_FILE_LINE_COMMANDS array in the config file
 function runRandomFileLineCommands(target, user, commandName) {
-	if (env.RANDOM_FILE_LINE_COMMANDS && commandName in env.RANDOM_FILE_LINE_COMMANDS) {
-		var fileName = env.RANDOM_FILE_LINE_COMMANDS[commandName];
+	if (env[cRANDOM_FILE_LINE_COMMANDS] && commandName in env[cRANDOM_FILE_LINE_COMMANDS]) {
+		var fileName = env[cRANDOM_FILE_LINE_COMMANDS][commandName];
 		client.say(target, readRandomLine(fileName));
 	}
 }
@@ -380,19 +395,19 @@ function runPeriodicMessages() {
 
 
 	// Load periodic messages
-	for (const periodicMessage in env.PERIODIC_MESSAGES) {
+	for (const periodicMessage in env[cPERIODIC_MESSAGES]) {
 
-		console.log(`Loading periodic message '${periodicMessage}' to run every ${env.PERIODIC_MESSAGES[periodicMessage]["INTERVAL"]} minutes`);
+		console.log(`Loading periodic message '${periodicMessage}' to run every ${env[cPERIODIC_MESSAGES][periodicMessage]["INTERVAL"]} minutes`);
 
 		let timer = setInterval(() => {
-			console.log(`Posting periodic message ${periodicMessage} every ${env.PERIODIC_MESSAGES[periodicMessage]["INTERVAL"]} minute`);
-			if (cCHAT in env.PERIODIC_MESSAGES[periodicMessage]) {
-				sendChat(channel, "", env.PERIODIC_MESSAGES[periodicMessage][cCHAT]);
+			console.log(`Posting periodic message ${periodicMessage} every ${env[cPERIODIC_MESSAGES][periodicMessage]["INTERVAL"]} minute`);
+			if (cCHAT in env[cPERIODIC_MESSAGES][periodicMessage]) {
+				sendChat(channel, "", env[cPERIODIC_MESSAGES][periodicMessage][cCHAT]);
 			}
-			if (cMEDIA in env.PERIODIC_MESSAGES[periodicMessage]) {
-				playMedia(channel, "", env.PERIODIC_MESSAGES[periodicMessage][cMEDIA]);
+			if (cMEDIA in env[cPERIODIC_MESSAGES][periodicMessage]) {
+				playMedia(channel, "", env[cPERIODIC_MESSAGES][periodicMessage][cMEDIA]);
 			}
-		}, env.PERIODIC_MESSAGES[periodicMessage]["INTERVAL"] * 60000); // milliseconds = minutes * 60 * 1000
+		}, env[cPERIODIC_MESSAGES][periodicMessage]["INTERVAL"] * 60000); // milliseconds = minutes * 60 * 1000
 		periodicMessageTimers.push(timer);
 	}
 }
@@ -481,38 +496,38 @@ function greetUser(target, user, commandName) {
 		let greeting = "";
 
 		// Find and format greeting text
-		if (user && user.username.toLowerCase() in env.GREETINGS && cCHAT in env.GREETINGS[user.username.toLowerCase()]) {
-			greeting = env.GREETINGS[user.username.toLowerCase()][cCHAT];
-		} else if (user.mod && cDEFAULT_MOD in env.GREETINGS && cCHAT in env.GREETINGS[cDEFAULT_MOD]) {
-			greeting = env.GREETINGS[cDEFAULT_MOD][cCHAT];
-		} else if (user.vip && cDEFAULT_VIP in env.GREETINGS && cCHAT in env.GREETINGS[cDEFAULT_VIP]) {
-			greeting = env.GREETINGS[cDEFAULT_VIP][cCHAT];
-		} else if (user.firstTimeChatter && cFIRST_TIME_CHATTER in env.GREETINGS && cCHAT in env.GREETINGS[cFIRST_TIME_CHATTER]) {
-			greeting = env.GREETINGS[cFIRST_TIME_CHATTER][cCHAT];
-		} else if (cCHAT in env.GREETINGS[cDEFAULT]) {
-			greeting = env.GREETINGS[cDEFAULT][cCHAT];
+		if (user && user.username.toLowerCase() in env[cGREETINGS] && cCHAT in env[cGREETINGS][user.username.toLowerCase()]) {
+			greeting = env[cGREETINGS][user.username.toLowerCase()][cCHAT];
+		} else if (user.mod && cDEFAULT_MOD in env[cGREETINGS] && cCHAT in env[cGREETINGS][cDEFAULT_MOD]) {
+			greeting = env[cGREETINGS][cDEFAULT_MOD][cCHAT];
+		} else if (user.vip && cDEFAULT_VIP in env[cGREETINGS] && cCHAT in env[cGREETINGS][cDEFAULT_VIP]) {
+			greeting = env[cGREETINGS][cDEFAULT_VIP][cCHAT];
+		} else if (user.firstTimeChatter && cFIRST_TIME_CHATTER in env[cGREETINGS] && cCHAT in env[cGREETINGS][cFIRST_TIME_CHATTER]) {
+			greeting = env[cGREETINGS][cFIRST_TIME_CHATTER][cCHAT];
+		} else if (cCHAT in env[cGREETINGS][cDEFAULT]) {
+			greeting = env[cGREETINGS][cDEFAULT][cCHAT];
 		}
 		sendChat(target, user, greeting);
 
 		// Find and play media
 		greeting = "";
-		if (env.GREETINGS[user.username.toLowerCase()] && env.GREETINGS[user.username.toLowerCase()][cMEDIA]) {
-			greeting = env.GREETINGS[user.username.toLowerCase()][cMEDIA];
-		} else if (user.mod && env.GREETINGS[cDEFAULT_MOD][cMEDIA]) {
-			greeting = env.GREETINGS[cDEFAULT_MOD][cMEDIA];
+		if (env[cGREETINGS][user.username.toLowerCase()] && env[cGREETINGS][user.username.toLowerCase()][cMEDIA]) {
+			greeting = env[cGREETINGS][user.username.toLowerCase()][cMEDIA];
+		} else if (user.mod && env[cGREETINGS][cDEFAULT_MOD][cMEDIA]) {
+			greeting = env[cGREETINGS][cDEFAULT_MOD][cMEDIA];
 		} else if (user.vip && GREETINGS[cDEFAULT_VIP][cMEDIA]) {
-			greeting = env.GREETINGS[cDEFAULT_VIP][cMEDIA];
-		} else if (user.firstTimeChatter && cFIRST_TIME_CHATTER in env.GREETINGS && cMEDIA in env.GREETINGS[cFIRST_TIME_CHATTER]) {
-			greeting = env.GREETINGS[cFIRST_TIME_CHATTER][cMEDIA];
-		} else if (env.GREETINGS[cDEFAULT][cMEDIA]) {
-			greeting = env.GREETINGS[cDEFAULT][cMEDIA];
+			greeting = env[cGREETINGS][cDEFAULT_VIP][cMEDIA];
+		} else if (user.firstTimeChatter && cFIRST_TIME_CHATTER in env[cGREETINGS] && cMEDIA in env[cGREETINGS][cFIRST_TIME_CHATTER]) {
+			greeting = env[cGREETINGS][cFIRST_TIME_CHATTER][cMEDIA];
+		} else if (env[cGREETINGS][cDEFAULT][cMEDIA]) {
+			greeting = env[cGREETINGS][cDEFAULT][cMEDIA];
 		}
 		playMedia(target, user, greeting);
 
 		// Shout out the user.  Does not do the shouting out itself but runs your shoutout command.
 		// We want to delay this a bit so it doesn't clash with any media playing
-		if (user.username.toLowerCase() in env.GREETINGS && cSHOUTOUT in env.GREETINGS[user.username.toLowerCase()]) {
-			sendShoutOut(target, user, env.GREETINGS[user.username.toLowerCase()][cSHOUTOUT]);
+		if (user.username.toLowerCase() in env[cGREETINGS] && cSHOUTOUT in env[cGREETINGS][user.username.toLowerCase()]) {
+			sendShoutOut(target, user, env[cGREETINGS][user.username.toLowerCase()][cSHOUTOUT]);
 		}
 	}
 }
@@ -581,10 +596,10 @@ function playMedia(target, user, media, replacements) {
 		}
 
 		// If Media browser source is enabled, then use that, else play using external media player
-		if(env.WEB_SERVER && env.WEB_SERVER.AUDIO_FILE_PATH) {
+		if(env[cWEB_SERVER] && env[cWEB_SERVER][cAUDIO_FILE_PATH]) {
 			updateMediaBrowserWithAudio(getAudioFileName(file));
-		} else if(env.MEDIA_PLAYER_COMMAND) {
-			let command = env.MEDIA_PLAYER_COMMAND.replace(cMEDIAFILE, file);
+		} else if(env[cMEDIA_PLAYER_COMMAND]) {
+			let command = env[cMEDIA_PLAYER_COMMAND].replace(cMEDIAFILE, file);
 
 			exec(command, (error, stdout, stderr) => {
 				if (error) {
@@ -598,7 +613,7 @@ function playMedia(target, user, media, replacements) {
 				console.log(`stdout: ${stdout}`);
 			});
 		} else {
-			console.log("ERROR: Neither MEDIA_PLAYER_COMMAND or WEB_SERVER.AUDIO_FILE_PATH. Can't play audio.");
+			console.log("ERROR: Neither MEDIA_PLAYER_COMMAND or WEB_SERVER[cAUDIO_FILE_PATH]. Can't play audio.");
 		}
 
 
@@ -649,15 +664,15 @@ function readRandomLine(fileName) {
 }
 
 function isFeatureEnabled(command) {
-	return (cFEATURE_FLAGS in env && command in env.COMMANDS_FEATURE_FLAGS && env.COMMANDS_FEATURE_FLAGS[command] === "true")
+	return (cFEATURE_FLAGS in env && command in env[cCOMMANDS_FEATURE_FLAGS] && env[cCOMMANDS_FEATURE_FLAGS][command] === "true")
 }
 
 function enableFeature(command) {
-	env.COMMANDS_FEATURE_FLAGS[command] = "true";
+	env[cCOMMANDS_FEATURE_FLAGS][command] = "true";
 }
 
 function disableFeature(command) {
-	env.COMMANDS_FEATURE_FLAGS[command] = "false";
+	env[cCOMMANDS_FEATURE_FLAGS][command] = "false";
 }
 
 // Load or reload the config file
@@ -762,16 +777,16 @@ function getAudioFileName(baseFileName) {
 // or paths that could lead to reading other directories or other shenanigans
 // Make sure the file exists
 function getAudioFilePath(baseFileName) {
-	if(env.WEB_SERVER && env.WEB_SERVER.AUDIO_FILE_PATH) {
+	if(env[cWEB_SERVER] && env[cWEB_SERVER][cAUDIO_FILE_PATH]) {
 		baseFileName = getAudioFileName(baseFileName);
-		let fullPath = `${env.WEB_SERVER.AUDIO_FILE_PATH}/${baseFileName}`;
+		let fullPath = `${env[cWEB_SERVER][cAUDIO_FILE_PATH]}/${baseFileName}`;
 		if(fs.existsSync(fullPath)) {
 			return fullPath;
 		} else {
 			console.log(`ERROR: audio file '${fullPath}' does not exist, cannot play audio`);
 		}
 	} else {
-		console.log(`ERROR: WEB_SERVER or WEB_SERVER.AUDIO_FILE_PATH not defined, cannot play audio`);
+		console.log(`ERROR: WEB_SERVER or WEB_SERVER[cAUDIO_FILE_PATH] not defined, cannot play audio`);
 	}
 	return("");
 }

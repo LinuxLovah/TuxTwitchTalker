@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+	<title>TuxTwitchTalker timer</title>
+</head>
+
+<body>
+	<span id="timer"></span>
+
+	<script src="/socket.io/socket.io.js"></script>
+	<script>
+		const counterElement = document.getElementById('timer');
+		var currentName = "";
+		var currentValue = 0;
+		var intervalId = 0;
+
+		function updateCounter(timerName, timerValue) {
+			currentName = timerName;
+			currentValue = timerValue;
+			if (timerValue > 0) {
+				minutes = parseInt(timerValue / 60, 10);
+        		seconds = parseInt(timerValue % 60, 10);
+				counterElement.textContent = `${timerName} ${minutes}:${seconds}`;
+			} else {
+				counterElement.textContent = "";
+				clearInterval(intervalId);
+			}
+		}
+
+		// Set the initial value, will be substituted on the server
+		var socket = io();
+		console.log('Timer socket created');
+
+		socket.on('timer_update', function (payload) {
+			// timerValue comes in as ms, convert to seconds
+			updateCounter(payload.timerName, payload.timerValue / 1000);
+
+			// Start counting down
+			intervalId = setInterval(function () {
+				currentValue -= 1;
+				updateCounter(currentName, currentValue);
+			}, 1000);
+		});
+	</script>
+</body>
+
+</html>

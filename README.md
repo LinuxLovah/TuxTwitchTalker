@@ -70,7 +70,7 @@ Reload the configuration file without restarting the bot. Useful when you make c
 User commands can be run by everyone in chat.  All user commands can be turned on and off in the configuration.
 
 #### Temperature conversion
-!xF (where x is a number) will print the celsius equivalent in chat, and !xC (where x is a number) will print the fahrenheit equivalent in chat.  For instance, typing **!44F** in chat will print **44F = 6.67C** in chat.
+**!xF** (where x is a number) will print the celsius equivalent in chat, and !xC (where x is a number) will print the fahrenheit equivalent in chat.  For instance, typing **!44F** in chat will print **44F = 6.67C** in chat.
 
 #### !times
 This command will print the current time in different time zones in chat.  The time zones it prints are determined by your configuration file.

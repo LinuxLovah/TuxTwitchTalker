@@ -240,5 +240,14 @@
 	"WEB_SERVER": {
 		"PORT":			8888,
 		"AUDIO_FILE_PATH": "../sounds"
-	}
+	},
+	"COMMENT_TIME_ZONES": [
+		"This is a list of time zones that will be reported by the !times command",
+		"Time zone long names (https://en.wikipedia.org/wiki/List_of_tz_database_time_zones),",
+		"Time zone abbreviations (https://gisgeography.com/world-time-zone-map/), and ",
+		"and IANA time zones ( https://www.iana.org/time-zones) will all work.",
+		"See https://moment.github.io/luxon/#/zones",
+		"This is an array not an object so notice the square brackets"
+	],
+	"TIME_ZONES": ["PST","MST","CST","EST","CNT","BET","UTC","ECT","EET","ACT"]
 }

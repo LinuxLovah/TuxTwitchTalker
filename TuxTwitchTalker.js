@@ -21,6 +21,7 @@ const { exit } = require('process');
 const http = require('http');
 const url = require('url');
 const { Server } = require("socket.io");
+const { DateTime } = require("luxon");
 
 
 //--------------------- Global variables
@@ -32,9 +33,6 @@ var periodicMessageTimers = [];
 var seenUsers = [];
 var webServer;
 var socketServer;
-
-
-var hitCounter=0;
 
 //--------------------- Constants
 const cADMIN_USERS =		"ADMIN_USERS";
@@ -60,10 +58,12 @@ const cPERIODIC_MESSAGES = 	"PERIODIC_MESSAGES";
 const cPORT = 				"PORT";
 const cRANDOM_FILE_LINE_COMMANDS = "RANDOM_FILE_LINE_COMMANDS";
 const cSHOUTOUT = 			"SHOUTOUT";
+const cSTATUS_OK = 			"200";
 const cTIMER_ALERT = 		"TIMER_ALERT";
 const cTIMER = 				"timer";
 const cTIMERNAME = 			"TIMERNAME";
 const cTIMEOUT = 			"TIMEOUT";
+const cTIME_ZONES = 		"TIME_ZONES";
 const cTMI_OAUTH = 			"TMI_OAUTH";
 const cTRIGGERED_MESSAGES = "TRIGGERED_MESSAGES";
 const cUSERNAME = 			"USERNAME";
@@ -217,9 +217,16 @@ function runAdminCommand(target, user, commandName, args) {
 
 function runUserCommand(target, user, commandName, args) {
 	if (commandName === '!audio') {
+		// This is an audio system test
 		updateMediaBrowserWithAudio("wilhelmscream.mp3");
-	} else if (commandName === '!dice' && isFeatureEnabled("dice")) {
+	} else if (commandName === "!dice" && isFeatureEnabled("dice")) {
 		runRollDice(target, user, commandName);
+	} else if (commandName.match(/![-]{0,1}[0-9]{1,4}[Ff]$/)) {
+		runTempConvertF(target, user, commandName);
+	} else if (commandName.match(/![-]{0,1}[0-9]{1,4}[Cc]$/)) {
+		runTempConvertC(target, user, commandName);
+	} else if (commandName === "!times") {
+		runTimes(target, user, commandName);
 	} else if (commandName.startsWith("!timer ")) {
 		runTimer(target, user, commandName, args);
 	} else if (commandName.startsWith("!+") && isFeatureEnabled(cCOUNTER)) {
@@ -347,6 +354,31 @@ function runRollDice(target, user, commandName) {
 	client.say(target, `You rolled a ${num}, ${user.username}`);
 }
 
+function runTempConvertF(target, user, commandName) {
+	let tempF = Number(commandName.replace(/[^0-9-]/g,""));
+	let tempC = (tempF - 32) * (5/9);
+	client.say(target, `${tempF}F = ${tempC.toFixed(2)}C`);
+}
+
+function runTempConvertC(target, user, commandName) {
+	let tempC = Number(commandName.replace(/[^0-9-]/g,""));
+	let tempF = (tempC * (9/5)) + 32;
+	client.say(target, `${tempC}C = ${tempF.toFixed(2)}F`);
+}
+
+function runTimes(target, user, commandName) {
+	if(env[cTIME_ZONES]) {
+		let message = "";
+
+		for(let tzOffset of env[cTIME_ZONES]) {
+			let zoneTime = DateTime.now().setZone(tzOffset);
+			message = `${message}${tzOffset}=${zoneTime.toFormat("hh:mma  ")}`;
+		}
+
+		client.say(target, message);
+	}
+}
+
 // Some commands are to read a random line from a file.
 // These commands will be defined in the RANDOM_FILE_LINE_COMMANDS array in the config file
 function runRandomFileLineCommands(target, user, commandName) {
@@ -374,7 +406,15 @@ function runTimer(target, user, commandName, args) {
 		timerName = args.slice(4).join("");
 	}
 	client.say(target, `Starting timer '${timerName}' for ${timeout}ms`);
+	if(isFeatureEnabled("webserver")) {
+		let payload = { "timerName": timerName, "timerValue": timeout}
+		socketServer.emit(`timer_update`, payload );
+	}
 	setTimeout(() => {
+		if(isFeatureEnabled("webserver")) {
+			let payload = { "timerName": timerName, "timerValue": 00}
+			socketServer.emit(`timer_update`, payload );
+		}
 		if (cTIMER_ALERT in env) {
 			if (cCHAT in env[cTIMER_ALERT]) {
 				sendChat(target, user, env[cTIMER_ALERT][cCHAT].replace(cTIMERNAME, timerName));
@@ -423,17 +463,15 @@ function onWebRequest(request, response) {
 	if (queryString.startsWith("/audio/")) {
 		serveAudio(queryString, response);
 	} else if (queryString.startsWith("/alert")) {
-		response.writeHead(200);
+		response.writeHead(cSTATUS_OK);
 		response.write(`${browserSourceAlertContent}`);
 		response.end();
 	} else if (queryString.startsWith("/counter")) {
 		serveCounterBrowserSource(queryString, response);
 	} else if (queryString.startsWith("/media")) {
 		serveMediaBrowserSource(queryString, response);
-	} else if (queryString.startsWith("/peng")) {
-		response.writeHead(200);
-		response.write('<html><head></head><body><iframe src="https://giphy.com/embed/VkMV9TldsPd28" frameBorder="0" ></iframe></body>');
-		response.end();
+	} else if (queryString.startsWith("/timer")) {
+		serveTimerBrowserSource(queryString, response);
 	}
 }
 
@@ -452,7 +490,7 @@ function serveCounterBrowserSource(queryString, response) {
 		content = fs.readFileSync(`html/counter_template.html`, 'UTF-8');
 	}
 	content = content.replace(/COUNTER_NAME/g, counterName).replace(/COUNTER_VALUE/g, counterValue);
-	response.writeHead(200);
+	response.writeHead(cSTATUS_OK);
 	response.write(content);
 	response.end();
 }
@@ -463,7 +501,7 @@ function serveCounterBrowserSource(queryString, response) {
 function serveMediaBrowserSource(queryString, response) {
 	var content="";
 	content = fs.readFileSync(`html/media_template.html`, 'UTF-8');
-	response.writeHead(200);
+	response.writeHead(cSTATUS_OK);
 	response.write(content);
 	response.end();
 }
@@ -489,6 +527,15 @@ function serveAudio(queryString, response) {
 	}
 
 }
+
+function serveTimerBrowserSource(queryString, response) {
+	var content="";
+	content = fs.readFileSync(`html/timer_template.html`, 'UTF-8');
+	response.writeHead(cSTATUS_OK);
+	response.write(content);
+	response.end();
+}
+
 
 
 //--------------------- Helper Methods
@@ -598,10 +645,13 @@ function playMedia(target, user, media, replacements) {
 		}
 
 		// If Media browser source is enabled, then use that, else play using external media player
-		if(env[cWEB_SERVER] && env[cWEB_SERVER][cAUDIO_FILE_PATH]) {
+		if(isFeatureEnabled("webserver") && env[cWEB_SERVER] && env[cWEB_SERVER][cAUDIO_FILE_PATH]) {
+			file = getAudioFileName(file);
+			console.log(`Playing ${file} through browser source`);
 			updateMediaBrowserWithAudio(getAudioFileName(file));
 		} else if(env[cMEDIA_PLAYER_COMMAND]) {
 			let command = env[cMEDIA_PLAYER_COMMAND].replace(cMEDIAFILE, file);
+			console.log(`Playing ${file} through ${env[cMEDIA_PLAYER_COMMAND]}`);
 
 			exec(command, (error, stdout, stderr) => {
 				if (error) {
@@ -615,7 +665,7 @@ function playMedia(target, user, media, replacements) {
 				console.log(`stdout: ${stdout}`);
 			});
 		} else {
-			console.log("ERROR: Neither MEDIA_PLAYER_COMMAND or WEB_SERVER[cAUDIO_FILE_PATH]. Can't play audio.");
+			console.log("ERROR: Neither MEDIA_PLAYER_COMMAND or WEB_SERVER[cAUDIO_FILE_PATH] and/or web server is disabled. Can't play audio.");
 		}
 
 
@@ -760,7 +810,6 @@ function counterWrite(counterName, counterValue) {
 	fs.writeFileSync(counterFile, counterValue.toString(), 'UTF-8');
 
 	// Update any browser sources with the new number
-	console.log(`Socket server sending ${counterValue} to counter_${counterName}_update`);
 	if (isFeatureEnabled("webserver")) {
 		socketServer.emit(`counter_${counterName}_update`, counterValue );
 	}

@@ -68,6 +68,12 @@ Reload the configuration file without restarting the bot. Useful when you make c
 
 ## **User commands**
 User commands can be run by everyone in chat.  All user commands can be turned on and off in the configuration.
+
+#### Temperature conversion
+!xF (where x is a number) will print the celsius equivalent in chat, and !xC (where x is a number) will print the fahrenheit equivalent in chat.  For instance, typing **!44F** in chat will print **44F = 6.67C** in chat.
+
+#### !times
+This command will print the current time in different time zones in chat.  The time zones it prints are determined by your configuration file.
 #### !dice
 Rolls a dice and replies in chat with the number (1-6) rolled.  This is mostly a proof of concept, as it was the first command I created.
 
@@ -117,6 +123,9 @@ The browser source URL for media is **http://localhost:8888/media**, and if usin
 #### **Counters**
 Counters can appear on your stream as a browser source using the URL **http://localhost:8888/counter/COUNTER_NAME_HERE** (eg http://localhost:8888/counter/deaths).  The browser source content template is **html/counter_template.html**, but a counter-specific one will be used if it exists.  The naming convention is html/counter_COUNTER_NAME_template.html (eg html/counter_deaths_template.html) exists.  Using these templates, you can customize how the browser source looks.  The string COUNTER_NAME is replaced with the name of the counter, and the string COUNTER_VALUE is replaced with the current value of that counter.
 
+#### **Timers**
+Timers can appear on your stream as a browser source using the URL **http://localhost:8888/timer** (eg http://localhost:8888/timer).   The browser source content template is **html/timer_template.html**.  As currently implemented, it will show the last timer started.  If you have a timer running, and start another timer before the first one finishes, it will display the new timer.  Having separate browser sources or templates for specific timers would be hard since they have arbitrary names that can include spaces, but if there is interest, I will look into redesigning it.
+
 
 ## Feature flags
 Many features and commands can be enabled or disabled without changing the code.  See the **COMMANDS_FEATURE_FLAGS** section in the configuration file.
@@ -146,6 +155,9 @@ TuxTwitchTalker is released under the [Apache 2.0 licence ](https://www.apache.o
 > The Apache License is a permissive free software license written by the Apache Software Foundation (ASF).[5] It allows users to use the software for any purpose, to distribute it, to modify it, and to distribute modified versions of the software under the terms of the license, without concern for royalties.
 
 In essence, anyone can use TuxTwitchTalker, but I don't want a company (like Streamlabs) to take it and sell it as a commercial product.  It will ALWAYS be free and open source.  However, I do appreciate attribution/mentions in your About panels or periodic messages in your chat.
+
+
+![](https://i.imgur.com/raTPBU7.png)
 
 ___
 # Creating An Account For Your Bot

@@ -175,7 +175,7 @@ function onMessageHandler(target, user, msg) {
 
 
 function runAdminCommand(target, user, commandName, args) {
-	if (user && user.username && env[cADMIN_USERS].includes(user.username.toLowerCase())) {
+if (user && user.username && env[cADMIN_USERS].includes(user.username.toLowerCase())) {
 		if (commandName === '!!clearSeen') {
 			seenUsers = [];
 			console.log(`Seen list is now ${seenUsers}`);
@@ -204,10 +204,10 @@ function runAdminCommand(target, user, commandName, args) {
 				"username": username
 			}
 			greetUser(target, testUser, commandName);
-		} else if (commandName === "!!greetingsOn") {
-			enableFeature("greetings");
-		} else if (commandName === "!!greetingsOff") {
-			disableFeature("greetings");
+		} else if (commandName.startsWith("!!enable ")) {
+			enableFeature(args[2]);
+		} else if (commandName.startsWith("!!disable ")) {
+			disableFeature(args[2]);
 		}
 	} else {
 		console.log(`Ignoring admin command '${commandName}' from '${user.username}'`);
@@ -241,28 +241,30 @@ function runUserCommand(target, user, commandName, args) {
 }
 
 function runTriggeredMessage(target, user, message, args) {
-	for (const trigger in env[cTRIGGERED_MESSAGES]) {
-		// Triggered commands that start with !! are for admin users.
-		if (message.startsWith("!!") && user && user.username && !env[cADMIN_USERS].includes(user.username.toLowerCase())) {
-			console.log(`User ${user.username} is not an admin and cannot run the triggered command ${message}`);
-			return
-		}
+	if(isFeatureEnabled("triggered")) {
+		for (const trigger in env[cTRIGGERED_MESSAGES]) {
+			// Triggered commands that start with !! are for admin users.
+			if (message.startsWith("!!") && user && user.username && !env[cADMIN_USERS].includes(user.username.toLowerCase())) {
+				console.log(`User ${user.username} is not an admin and cannot run the triggered command ${message}`);
+				return
+			}
 
-		const regex = new RegExp(trigger);
-		const matches = message.match(regex);
-		if (matches) {
-			console.log(`Found triggered message matching ${regex}`);
-			if (cCHAT in env[cTRIGGERED_MESSAGES][trigger]) {
-				let reply = env[cTRIGGERED_MESSAGES][trigger][cCHAT];
-				sendChat(target, user, reply, matches);
-			}
-			if (cMEDIA in env[cTRIGGERED_MESSAGES][trigger]) {
-				let mediaFile = env[cTRIGGERED_MESSAGES][trigger][cMEDIA];
-				playMedia(target, user, mediaFile);
-			}
-			if (cSHOUTOUT in env[cTRIGGERED_MESSAGES][trigger]) {
-				let shoutOutCommand = env[cTRIGGERED_MESSAGES][trigger][cSHOUTOUT];
-				sendShoutOut(target, user, shoutOutCommand, matches);
+			const regex = new RegExp(trigger);
+			const matches = message.match(regex);
+			if (matches) {
+				console.log(`Found triggered message matching ${regex}`);
+				if (cCHAT in env[cTRIGGERED_MESSAGES][trigger]) {
+					let reply = env[cTRIGGERED_MESSAGES][trigger][cCHAT];
+					sendChat(target, user, reply, matches);
+				}
+				if (cMEDIA in env[cTRIGGERED_MESSAGES][trigger]) {
+					let mediaFile = env[cTRIGGERED_MESSAGES][trigger][cMEDIA];
+					playMedia(target, user, mediaFile);
+				}
+				if (cSHOUTOUT in env[cTRIGGERED_MESSAGES][trigger]) {
+					let shoutOutCommand = env[cTRIGGERED_MESSAGES][trigger][cSHOUTOUT];
+					sendShoutOut(target, user, shoutOutCommand, matches);
+				}
 			}
 		}
 	}
@@ -442,12 +444,14 @@ function runPeriodicMessages() {
 		console.log(`Loading periodic message '${periodicMessage}' to run every ${env[cPERIODIC_MESSAGES][periodicMessage]["INTERVAL"]} minutes`);
 
 		let timer = setInterval(() => {
-			console.log(`Posting periodic message ${periodicMessage} every ${env[cPERIODIC_MESSAGES][periodicMessage]["INTERVAL"]} minute`);
-			if (cCHAT in env[cPERIODIC_MESSAGES][periodicMessage]) {
-				sendChat(channel, "", env[cPERIODIC_MESSAGES][periodicMessage][cCHAT]);
-			}
-			if (cMEDIA in env[cPERIODIC_MESSAGES][periodicMessage]) {
-				playMedia(channel, "", env[cPERIODIC_MESSAGES][periodicMessage][cMEDIA]);
+			if(isFeatureEnabled("periodic")) {
+				console.log(`Posting periodic message ${periodicMessage} every ${env[cPERIODIC_MESSAGES][periodicMessage]["INTERVAL"]} minute`);
+				if (cCHAT in env[cPERIODIC_MESSAGES][periodicMessage]) {
+					sendChat(channel, "", env[cPERIODIC_MESSAGES][periodicMessage][cCHAT]);
+				}
+				if (cMEDIA in env[cPERIODIC_MESSAGES][periodicMessage]) {
+					playMedia(channel, "", env[cPERIODIC_MESSAGES][periodicMessage][cMEDIA]);
+				}
 			}
 		}, env[cPERIODIC_MESSAGES][periodicMessage]["INTERVAL"] * 60000); // milliseconds = minutes * 60 * 1000
 		periodicMessageTimers.push(timer);
@@ -719,14 +723,21 @@ function isFeatureEnabled(command) {
 	return (cFEATURE_FLAGS in env && command in env[cCOMMANDS_FEATURE_FLAGS] && env[cCOMMANDS_FEATURE_FLAGS][command] === "true")
 }
 
-function enableFeature(command) {
-	env[cCOMMANDS_FEATURE_FLAGS][command] = "true";
+function enableFeature(feature) {
+	if(env[cCOMMANDS_FEATURE_FLAGS][feature]) {
+		env[cCOMMANDS_FEATURE_FLAGS][feature] = "true";
+	} else {
+		console.log(`Cannot enable '${feature}' as it is not in the feature list`)
+	}
 }
 
-function disableFeature(command) {
-	env[cCOMMANDS_FEATURE_FLAGS][command] = "false";
+function disableFeature(feature) {
+	if(env[cCOMMANDS_FEATURE_FLAGS][feature]) {
+		env[cCOMMANDS_FEATURE_FLAGS][feature] = "false";
+	} else {
+		console.log(`Cannot disable '${feature}' as it is not in the feature list`)
+	}
 }
-
 // Load or reload the config file
 function loadConfigFile() {
 	delete require.cache[require.resolve(configFile)];

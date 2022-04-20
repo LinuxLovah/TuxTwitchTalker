@@ -3,7 +3,7 @@ TuxTwitchTalker
 
 # Introduction
 
-TuxTwitchTalker is a chat bot to connect to a Twitch channel and add functionality, respond to events, etc.  All of the functionality released so far are independent of the streaming software you use, as it only connects to Twitch (that may change in the future).
+TuxTwitchTalker (TTT) is a chat bot to connect to a Twitch channel and add functionality, respond to events, etc.  All of the functionality released so far are independent of the streaming software you use, as it only connects to Twitch (that may change in the future).
 
 Some of the features (like playing media in response to events) are only effective if running on the streaming computer, but most could run on any computer, since most of the functionality is interacting with chat.
 
@@ -47,19 +47,21 @@ When a specific word or phrase is mentioned, the user can be just warned, they c
    * Forbidden phrases can be optionally disabled for mods and VIPs via feature flag
 
 ## **Administrative commands**
-Administratuve commands can only be executed by specific users you specify in the configuration file.
-#### **!!greetingsOff**
-Disable greeting feature.  Useful for raids where lots of people start talking in chat at once
-#### !!greetingsOn
-Enable greeting feature again
+Administrative commands can only be executed by specific users you specify in the configuration file.
+
+#### !!disable [FEATURE]
+Disable any feature defined in the COMMANDS_FEATURE_FLAGS configuration block for the current bot run.  The configuration file does not get updated.  For example, to disable periodic messages, type **!!disable periodic** in chat.  The next time you start the bot it will use the status from your configuration file.
+
+#### !!enable [FEATURE]
+Enable any feature defined in the COMMANDS_FEATURE_FLAGS configuration block for the current bot run.  The configuration file does not get updated.  For example, if you typed **!!disable greetings** in chat due to a raid, you can type **!!enable greetings** to enable greeting viewers as they type in chat for the first time again.
 
 #### !!clearSeen
 Clears the list of seen users, so they will be greeted again when they next chat.
-#### !!delSeen USERNAME
+#### !!delSeen [USERNAME]
 Remove USERNAME from the seen list (specify a real username)
-####  !!addSeen USERNAME
+####  !!addSeen [USERNAME]
 Adds USERNAME to the seen list (specify a real username)
-####  !!testGreeting USERNAME
+####  !!testGreeting [USERNAME]
 Tests the chat and media greetings for USERNAME to verify they are configured right (specify a real username)
 ####  !!exit
 Stops the bot from running.
@@ -103,7 +105,7 @@ As shipped, the bot is configured with a **!dadjoke** command that will send a r
 ## **Web server browser sources**
 TuxTwitchTaker has a built-in web server that can be used as a browser source in your streaming software (like OBS) to expose information from the bot.  The base browser source functionality was added in version 2.3.0.  I have much more planned to do with this feature now that I have it working, so look for more goodies here.
 
-Each browser source is associated with one or more separate template filess, so the content to send can be changed without modifying the main program at all.
+Each browser source is associated with one or more separate template files, so the content to send can be changed without modifying the main program at all.
 
 No styling is needed in the template because styling can be specified in the browser source configuration in your streaming software. For instance:
 
@@ -128,7 +130,7 @@ Timers can appear on your stream as a browser source using the URL **http://loca
 
 
 ## Feature flags
-Many features and commands can be enabled or disabled without changing the code.  See the **COMMANDS_FEATURE_FLAGS** section in the configuration file.
+Many features and commands can be enabled or disabled without changing the code.  See the **COMMANDS_FEATURE_FLAGS** section in the configuration file.  As documented above, the **!!enable [FEATURE]** and **!disable [FEATURE]** commands can be used to turn features on and off during the current TTT run without changing the configuration file.
 
 
 ___

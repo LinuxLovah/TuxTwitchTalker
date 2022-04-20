@@ -50,13 +50,16 @@
 		"If the value is 'true', then that command will be enabled, otherwise it will be disabled."
 	],
 	"COMMANDS_FEATURE_FLAGS": {
-		"dice": 			"true",
-		"timer":			"true",
 		"counter":			"true",
-		"webserver":		"false",
+		"dice": 			"true",
+		"forbiddenForModsVIPs": "true",
 		"greetings":		"true",
 		"imagelink":		"true",
-		"forbiddenForModsVIPs": "true"
+		"periodic":			"true",
+		"temperature":		"true",
+		"timer":			"true",
+		"triggered":		"true",
+		"webserver":		"false"
 	},
 	"COMMENT_GREETINGS": [
 		"This is a list of regulars in your channel, and how you would like them",

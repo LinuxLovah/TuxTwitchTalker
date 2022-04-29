@@ -69,6 +69,29 @@ const cTRIGGERED_MESSAGES = "TRIGGERED_MESSAGES";
 const cUSERNAME = 			"USERNAME";
 const cWEB_SERVER = 		"WEB_SERVER"
 
+// This is the list of elements that must be present and non-empty in the config file
+// used by loadConfig to validate the config file
+const requiredConfigElements = [
+	'newEnv["CONFIG_SCHEMA_VERSION"]',
+	'newEnv["BOT_NAME"]',
+	'newEnv["TMI_OAUTH"]',
+	'newEnv["IGNORE_USERS"]',
+	'newEnv["ADMIN_USERS"]',
+	'newEnv["CHANNELS"]',
+	'newEnv["CHANNEL_ID"]',
+	'newEnv["COMMANDS_FEATURE_FLAGS"]',
+	'newEnv["COMMANDS_FEATURE_FLAGS"]["counter"]',
+	'newEnv["COMMANDS_FEATURE_FLAGS"]["dice"]',
+	'newEnv["COMMANDS_FEATURE_FLAGS"]["forbiddenForModsVIPs"]',
+	'newEnv["COMMANDS_FEATURE_FLAGS"]["greetings"]',
+	'newEnv["COMMANDS_FEATURE_FLAGS"]["periodic"]',
+	'newEnv["COMMANDS_FEATURE_FLAGS"]["temperature"]',
+	'newEnv["COMMANDS_FEATURE_FLAGS"]["timer"]',
+	'newEnv["COMMANDS_FEATURE_FLAGS"]["triggered"]',
+	'newEnv["COMMANDS_FEATURE_FLAGS"]["webserver"]'
+]
+const requiredConfigSchema = Number("2.0");
+
 //--------------------- Config
 // First parameter is the config file to load
 // Default is "./config.json"
@@ -742,10 +765,31 @@ function disableFeature(feature) {
 function loadConfigFile() {
 	delete require.cache[require.resolve(configFile)];
 	try {
-		let envNew = require(configFile);
+		let newEnv = require(configFile);
+		let foundError = false;
+
+		for(let varName of requiredConfigElements) {
+			let varValue=eval(varName);
+			if(! varValue || varValue == null || varValue == "") {
+				console.log(`ERROR: variable '${varName}' is not defined in your configuration file`);
+				foundError = true;
+			}
+		}
+
+		let configSchemaVersion = Number(Number(newEnv["CONFIG_SCHEMA_VERSION"]));
+		if(configSchemaVersion < requiredConfigSchema) {
+			console.log(`ERROR: Configuration file schema version of ${newEnv["CONFIG_SCHEMA_VERSION"]} is lower than the required schema version of ${requiredConfigSchema}`);
+			foundError = true;
+		}
+
+		if(foundError) {
+			console.log(`Exiting due to configuration file errors`);
+			exit(1);
+		}
+
 		console.log(`config file '${configFile}' loaded`);
-		if (envNew && Object.keys(envNew).length > 0) {
-			env = envNew;
+		if (newEnv && Object.keys(newEnv).length > 0) {
+			env = newEnv;
 		}
 
 		runPeriodicMessages();

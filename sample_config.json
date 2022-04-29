@@ -14,6 +14,14 @@
 		"- All of the 'CHAT', 'MEDIA', and 'SHOUTOUT' entries are optional.  If you don't want anything to appear in chat, or don't want a media file to play, just leave them out.",
 		"- Most features that do not rely on explicit configuration in this file can be enabled or disabled in the 'COMMANDS_FEATURE_FLAGS' section."
 	],
+	"COMMENT_CONFIG_SCHEMA_VERSION": [
+		"Starting with version 2.4.0 of the bot, I am adding a config file schema version to the config file.",
+		"Now that the program is becoming more advanced and config changes will be more complicated, this is",
+		"needed to make sure that existing users update their config files as they update their bots.",
+		"This is intentionally not the same as the software version because the schema may not change ",
+		"for several versions if no new mandatory fields are added/renamed."
+	],
+	"CONFIG_SCHEMA_VERSION": "2.0",
 	"COMMENT_BOT_NAME": "Username for the bot.  Must be a real Twitch username, may be your own username",
 	"BOT_NAME": "YourBotName",
 	"COMMENT_TMI_OAUTH": "Generate this value from https://twitchapps.com/tmi/ logged in as the above user",
@@ -47,7 +55,7 @@
 	],
 	"COMMENT_COMMANDS_FEATURE_FLAGS": [
 		"Command Feature Flags can turn on or off the pre-programmed commands",
-		"If the value is 'true', then that command will be enabled, otherwise it will be disabled."
+		"If the value is present and is 'true', then that command will be enabled, otherwise it will be disabled."
 	],
 	"COMMANDS_FEATURE_FLAGS": {
 		"counter":			"true",
@@ -252,5 +260,19 @@
 		"See https://moment.github.io/luxon/#/zones",
 		"This is an array not an object so notice the square brackets"
 	],
-	"TIME_ZONES": ["PST","MST","CST","EST","CNT","BET","UTC","ECT","EET","ACT"]
+	"TIME_ZONES": ["America/Los_Angeles",
+		"America/Denver",
+		"America/Chicago",
+		"America/New_York",
+		"America/Halifax",
+		"America/Sao_Paulo",
+		"Europe/London",
+		"Europe/Berlin",
+		"Europe/Kiev",
+		"Asia/Jerusalem",
+		"Asia/Dubai",
+		"Asia/Shanghai",
+		"Asia/Tokyo",
+		"Australia/Sydney"
+	]
 }

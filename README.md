@@ -214,6 +214,13 @@ ___
 If you need to specify an alternate configuration file, type
 > npm start MY_CONFIGURATION_FILE.json
 
+___
+# Updating TuxTwitchTalker
+
+Updating TuxTwitchTalker is pretty much the same process as installing it, except:
+
+* It's unlikely you will have modified local files that ships, but do make sure to back up your existing installation first, especially as TTT expands its use of the web browser source server, and associated template files.
+* Make sure to compare your configuration file to the sample configuration file to include any updates.  As of version 2.4.0 of TTT, the configuration file includes a schema version number that the software will check for, and warn you if yours is from an older schema. But not every configuration file change will drive a new schema version, which will happen with renamed fields, new required fields, etc.
 
 ___
 # Support/Contact

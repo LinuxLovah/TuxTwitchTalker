@@ -55,6 +55,10 @@ Disable any feature defined in the COMMANDS_FEATURE_FLAGS configuration block fo
 #### !!enable [FEATURE]
 Enable any feature defined in the COMMANDS_FEATURE_FLAGS configuration block for the current bot run.  The configuration file does not get updated.  For example, if you typed **!!disable greetings** in chat due to a raid, you can type **!!enable greetings** to enable greeting viewers as they type in chat for the first time again.
 
+#### !!poll [POLL_NAME~TIMEOUT~OPTION1~OPTION2...]
+Presents the user with a poll name and description, and several options to choose from by typing options in chat.  The poll can also render as a web browser source.
+See [Polls](POLLS.md).
+
 #### !!clearSeen
 Clears the list of seen users, so they will be greeted again when they next chat.
 #### !!delSeen [USERNAME]

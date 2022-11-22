@@ -9,7 +9,7 @@
   "dependencies": {
     "express": "^4.17.2",
     "json-schema": "^0.4.0",
-	"socket.io": "4.4.1",
+	"socket.io": "4.5.3",
     "tmi.js": "^1.8.5",
 	"luxon": "2.3.1"
   },
